@@ -47,10 +47,6 @@ func NewJSONQueryUI() *UI {
 	ui.suggestions.SetTitle("Suggestions")
 	ui.suggestions.ShowSecondaryText(false)
 	ui.suggestions.SetBorder(true)
-	suggestions := []string{"Test0", "Test1", "Test2"}
-	for _, v := range suggestions {
-		ui.suggestions.AddItem(v, "", 0, nil)
-	}
 
 	ui.debugLog.SetTitle("debug")
 	ui.debugLog.SetBorder(true)
@@ -134,6 +130,16 @@ func (ui *UI) Run() error {
 	if ui.jsonData == nil {
 		return fmt.Errorf("Error: LoadJsonFile before Run")
 	}
+
 	ui.setOutputJsonData(ui.jsonData)
+
+	unnestedKeys, err := GetUnnestedKeys(ui.jsonData)
+	if err != nil {
+		return fmt.Errorf("Error parsing JSON: %v\n", err)
+	}
+	for _, key := range unnestedKeys {
+		ui.suggestions.AddItem(key, "", 0, nil)
+	}
+
 	return ui.app.SetRoot(ui.layout, true).EnableMouse(true).Run()
 }
