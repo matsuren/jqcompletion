@@ -1,2 +1,2 @@
-# jqcompletion
-jqcompletion
+# Jq completion
+Jq completion tool
