@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/itchyny/gojq"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -58,21 +57,29 @@ func NewJSONQueryUI() *UI {
 			current := ui.suggestions.GetCurrentItem()
 			if current > 0 {
 				ui.suggestions.SetCurrentItem(current - 1)
+				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
 		case event.Key() == tcell.KeyCtrlN:
 			current := ui.suggestions.GetCurrentItem()
 			if current < ui.suggestions.GetItemCount()-1 {
 				ui.suggestions.SetCurrentItem(current + 1)
+				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
 		case event.Key() == tcell.KeyTab:
 			if ui.suggestions.GetItemCount() > 0 {
 				index := ui.suggestions.GetCurrentItem()
-				mainText, _ := ui.suggestions.GetItemText(index)
+				query, _ := ui.suggestions.GetItemText(index)
 				currentQuery := ui.queryInput.GetText()
-				ui.SetDebugText(fmt.Sprintf("Debug: %v, %v", mainText, currentQuery))
+				ui.queryInput.SetText(query)
+				ui.QueryJsonDataAndShow(query)
+				ui.SetDebugText(fmt.Sprintf("Debug: %v, %v", query, currentQuery))
 			}
+			return nil
+		case event.Key() == tcell.KeyEnter:
+			query := ui.queryInput.GetText()
+			ui.QueryJsonDataAndShow(query)
 			return nil
 		}
 		return event
@@ -82,11 +89,11 @@ func NewJSONQueryUI() *UI {
 	leftFlex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(ui.queryInput, 3, 0, true).
-		AddItem(ui.evaluatedQuery, 3, 0, false).
 		AddItem(ui.suggestions, 0, 1, false)
 
 	rightFlex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
+		AddItem(ui.evaluatedQuery, 3, 0, false).
 		AddItem(ui.jsonOutput, 0, 1, false).
 		AddItem(ui.debugLog, 3, 0, false)
 
@@ -98,16 +105,32 @@ func NewJSONQueryUI() *UI {
 	return ui
 }
 
+func (ui *UI) UpdateQueryJsonDataBySelection() {
+	index := ui.suggestions.GetCurrentItem()
+	query, _ := ui.suggestions.GetItemText(index)
+	ui.QueryJsonDataAndShow(query)
+}
+
 func (ui *UI) SetDebugText(text string) {
 	ui.debugLog.SetText(text)
 }
 
-func (ui *UI) setOutputJsonData(jsonData interface{}) {
+func (ui *UI) SetOutputJsonData(jsonData interface{}) {
 	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {
 		ui.SetDebugText(fmt.Sprintf("Error: %v", err))
 	}
 	ui.jsonOutput.SetText(string(resultBytes))
+}
+
+func (ui *UI) QueryJsonDataAndShow(query string) {
+	evalQuery, result := RobustQueryJsonData(query, ui.jsonData)
+	if len(evalQuery) > 0 {
+		ui.evaluatedQuery.SetText(evalQuery)
+		ui.SetOutputJsonData(result)
+	} else if msg, ok := result.(string); ok {
+		ui.SetDebugText(msg)
+	}
 }
 
 func (ui *UI) LoadJsonFile(jsonPath string) error {
@@ -131,7 +154,7 @@ func (ui *UI) Run() error {
 		return fmt.Errorf("Error: LoadJsonFile before Run")
 	}
 
-	ui.setOutputJsonData(ui.jsonData)
+	ui.SetOutputJsonData(ui.jsonData)
 
 	unnestedKeys, err := GetUnnestedKeys(ui.jsonData)
 	if err != nil {
