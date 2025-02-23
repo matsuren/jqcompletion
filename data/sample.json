@@ -1,0 +1,14 @@
+{
+  "version": 3.9,
+  "tag": "Tag",
+  "results": [
+    {
+      "level": "Info",
+      "message": "Info message"
+    },
+    {
+      "level": "Debug",
+      "message": "Debug message"
+    }
+  ]
+}
