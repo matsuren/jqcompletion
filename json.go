@@ -96,8 +96,11 @@ func GetUnnestedKeys(jsonData interface{}) ([]string, error) {
 }
 
 func FuzzyFind(query string, candidates []string) []string {
-	if len(query) == 0 || len(candidates) == 0 {
+	if len(candidates) == 0 {
 		return nil
+	}
+	if query == "" {
+		return candidates
 	}
 	matches := fuzzy.Find(query, candidates)
 	result := make([]string, 0, len(matches))

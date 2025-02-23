@@ -15,7 +15,7 @@ type UI struct {
 	evaluatedQuery *tview.TextView
 	jsonOutput     *tview.TextView
 	debugLog       *tview.TextView
-	suggestions    *tview.List
+	suggestionList *tview.List
 	layout         *tview.Flex
 	jsonData       interface{}
 }
@@ -26,7 +26,7 @@ func NewJSONQueryUI() *UI {
 		queryInput:     tview.NewInputField(),
 		evaluatedQuery: tview.NewTextView(),
 		jsonOutput:     tview.NewTextView(),
-		suggestions:    tview.NewList(),
+		suggestionList: tview.NewList(),
 		debugLog:       tview.NewTextView(),
 		layout:         tview.NewFlex(),
 		jsonData:       nil,
@@ -37,15 +37,15 @@ func NewJSONQueryUI() *UI {
 	ui.queryInput.SetFieldWidth(0)
 	ui.queryInput.SetLabel("jq> ")
 
-	ui.evaluatedQuery.SetTitle("evaluated query")
+	ui.evaluatedQuery.SetTitle("Evaluated query")
 	ui.evaluatedQuery.SetBorder(true)
 
 	ui.jsonOutput.SetTitle("Result")
 	ui.jsonOutput.SetBorder(true)
 
-	ui.suggestions.SetTitle("Suggestions")
-	ui.suggestions.ShowSecondaryText(false)
-	ui.suggestions.SetBorder(true)
+	ui.suggestionList.SetTitle("Suggestions")
+	ui.suggestionList.ShowSecondaryText(false)
+	ui.suggestionList.SetBorder(true)
 
 	ui.debugLog.SetTitle("debug")
 	ui.debugLog.SetBorder(true)
@@ -54,23 +54,23 @@ func NewJSONQueryUI() *UI {
 	ui.queryInput.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch {
 		case event.Key() == tcell.KeyCtrlP:
-			current := ui.suggestions.GetCurrentItem()
+			current := ui.suggestionList.GetCurrentItem()
 			if current > 0 {
-				ui.suggestions.SetCurrentItem(current - 1)
+				ui.suggestionList.SetCurrentItem(current - 1)
 				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
 		case event.Key() == tcell.KeyCtrlN:
-			current := ui.suggestions.GetCurrentItem()
-			if current < ui.suggestions.GetItemCount()-1 {
-				ui.suggestions.SetCurrentItem(current + 1)
+			current := ui.suggestionList.GetCurrentItem()
+			if current < ui.suggestionList.GetItemCount()-1 {
+				ui.suggestionList.SetCurrentItem(current + 1)
 				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
 		case event.Key() == tcell.KeyTab:
-			if ui.suggestions.GetItemCount() > 0 {
-				index := ui.suggestions.GetCurrentItem()
-				query, _ := ui.suggestions.GetItemText(index)
+			if ui.suggestionList.GetItemCount() > 0 {
+				index := ui.suggestionList.GetCurrentItem()
+				query, _ := ui.suggestionList.GetItemText(index)
 				currentQuery := ui.queryInput.GetText()
 				ui.queryInput.SetText(query)
 				ui.QueryJsonDataAndShow(query)
@@ -85,11 +85,13 @@ func NewJSONQueryUI() *UI {
 		return event
 	})
 
+	ui.queryInput.SetChangedFunc(ui.updateSuggestionList)
+
 	// Create layout
 	leftFlex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(ui.queryInput, 3, 0, true).
-		AddItem(ui.suggestions, 0, 1, false)
+		AddItem(ui.suggestionList, 0, 1, false)
 
 	rightFlex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -105,9 +107,25 @@ func NewJSONQueryUI() *UI {
 	return ui
 }
 
+func (ui *UI) updateSuggestionList(query string) {
+	ui.suggestionList.Clear()
+	unnestedKeys, err := GetUnnestedKeys(ui.jsonData)
+	if err != nil {
+		ui.debugLog.SetText(fmt.Sprintf("Error parsing JSON: %v\n", err))
+		return
+	}
+	matchedKeys := FuzzyFind(query, unnestedKeys)
+	for _, key := range matchedKeys {
+		ui.suggestionList.AddItem(key, "", 0, nil)
+	}
+
+    // Update based on current selection on new suggestions
+	ui.UpdateQueryJsonDataBySelection()
+}
+
 func (ui *UI) UpdateQueryJsonDataBySelection() {
-	index := ui.suggestions.GetCurrentItem()
-	query, _ := ui.suggestions.GetItemText(index)
+	index := ui.suggestionList.GetCurrentItem()
+	query, _ := ui.suggestionList.GetItemText(index)
 	ui.QueryJsonDataAndShow(query)
 }
 
@@ -156,13 +174,7 @@ func (ui *UI) Run() error {
 
 	ui.SetOutputJsonData(ui.jsonData)
 
-	unnestedKeys, err := GetUnnestedKeys(ui.jsonData)
-	if err != nil {
-		return fmt.Errorf("Error parsing JSON: %v\n", err)
-	}
-	for _, key := range unnestedKeys {
-		ui.suggestions.AddItem(key, "", 0, nil)
-	}
+	ui.updateSuggestionList("")
 
 	return ui.app.SetRoot(ui.layout, true).EnableMouse(true).Run()
 }
