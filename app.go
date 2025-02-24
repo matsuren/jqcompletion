@@ -124,6 +124,9 @@ func (ui *UI) updateSuggestionList(query string) {
 }
 
 func (ui *UI) UpdateQueryJsonDataBySelection() {
+    if ui.suggestionList.GetItemCount() == 0{
+        return
+    }
 	index := ui.suggestionList.GetCurrentItem()
 	query, _ := ui.suggestionList.GetItemText(index)
 	ui.QueryJsonDataAndShow(query)
