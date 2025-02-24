@@ -51,23 +51,23 @@ func NewJSONQueryUI() *UI {
 	ui.debugLog.SetBorder(true)
 
 	// Key binding
-	ui.queryInput.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch {
-		case event.Key() == tcell.KeyCtrlP:
+	ui.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyCtrlP, tcell.KeyUp:
 			current := ui.suggestionList.GetCurrentItem()
 			if current > 0 {
 				ui.suggestionList.SetCurrentItem(current - 1)
 				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
-		case event.Key() == tcell.KeyCtrlN:
+		case tcell.KeyCtrlN, tcell.KeyDown:
 			current := ui.suggestionList.GetCurrentItem()
 			if current < ui.suggestionList.GetItemCount()-1 {
 				ui.suggestionList.SetCurrentItem(current + 1)
 				ui.UpdateQueryJsonDataBySelection()
 			}
 			return nil
-		case event.Key() == tcell.KeyTab:
+		case tcell.KeyTab:
 			if ui.suggestionList.GetItemCount() > 0 {
 				index := ui.suggestionList.GetCurrentItem()
 				query, _ := ui.suggestionList.GetItemText(index)
@@ -77,7 +77,7 @@ func NewJSONQueryUI() *UI {
 				ui.SetDebugText(fmt.Sprintf("Debug: %v, %v", query, currentQuery))
 			}
 			return nil
-		case event.Key() == tcell.KeyEnter:
+		case tcell.KeyEnter:
 			query := ui.queryInput.GetText()
 			ui.QueryJsonDataAndShow(query)
 			return nil
@@ -86,6 +86,10 @@ func NewJSONQueryUI() *UI {
 	})
 
 	ui.queryInput.SetChangedFunc(ui.updateSuggestionList)
+	ui.suggestionList.SetSelectedFunc(func(i int, _ string, _ string, _ rune) {
+		ui.suggestionList.SetCurrentItem(i)
+		ui.UpdateQueryJsonDataBySelection()
+	})
 
 	// Create layout
 	leftFlex := tview.NewFlex().
@@ -119,14 +123,14 @@ func (ui *UI) updateSuggestionList(query string) {
 		ui.suggestionList.AddItem(key, "", 0, nil)
 	}
 
-    // Update based on current selection on new suggestions
+	// Update based on current selection on new suggestions
 	ui.UpdateQueryJsonDataBySelection()
 }
 
 func (ui *UI) UpdateQueryJsonDataBySelection() {
-    if ui.suggestionList.GetItemCount() == 0{
-        return
-    }
+	if ui.suggestionList.GetItemCount() == 0 {
+		return
+	}
 	index := ui.suggestionList.GetCurrentItem()
 	query, _ := ui.suggestionList.GetItemText(index)
 	ui.QueryJsonDataAndShow(query)
