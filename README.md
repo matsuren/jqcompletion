@@ -23,7 +23,7 @@ curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jq
 curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jqcompletion_${LATEST#v}_darwin_arm64.tar.gz" | tar -xz
 
 # Move to a directory in your PATH
-sudo mv jqcompletion $HOME/.local/bin
+mv jqcompletion $HOME/.local/bin
 ```
 
 Or
