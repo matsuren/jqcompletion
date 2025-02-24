@@ -34,7 +34,6 @@ func TestGetKeys(t *testing.T) {
 	wantErr := false
 
 	got, err := GetKeys(input)
-	fmt.Println(got, err)
 
 	// Check error cases
 	if (err != nil) != wantErr {
@@ -67,7 +66,6 @@ func TestGetUnnestedKeys(t *testing.T) {
 	want := []string{".status", ".user.age", ".user.name"}
 
 	got, err := GetUnnestedKeys(input)
-	fmt.Println(got, err)
 
 	// Check error cases
 	if err != nil {
