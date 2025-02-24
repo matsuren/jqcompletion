@@ -8,9 +8,8 @@ import (
 func main() {
 	var jsonPath string
 	if len(os.Args) == 1 {
-		fmt.Println("Usage: program <json_file_path>")
-		fmt.Println("DEBUGMODE: Use sample json file")
-		jsonPath = "./data/sample.json"
+		fmt.Println("Usage: jqcompletion <json_file_path>")
+        os.Exit(0)
 	} else {
 		jsonPath = os.Args[1]
 	}
