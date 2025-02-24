@@ -115,7 +115,7 @@ func JoinPath(v []interface{}) string {
 	for _, path := range v {
 		switch path.(type) {
 		case int:
-			joinedPath += fmt.Sprintf("[]")
+			joinedPath += "[]"
 		default:
 			joinedPath += fmt.Sprintf(".%v", path)
 		}
