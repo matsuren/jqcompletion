@@ -13,7 +13,8 @@ Hobby project to learn Go by creating some tools.
 
 Download binary
 ```
-LATEST=v0.0.1
+# Get the latest release version
+LATEST=$(curl -s https://api.github.com/repos/matsuren/jqcompletion/releases/latest | grep tag_name | cut -d '"' -f 4)
 
 # For linux amd64 architecture
 curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jqcompletion_${LATEST#v}_linux_amd64.tar.gz" | tar -xz
@@ -23,9 +24,6 @@ curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jq
 
 # Move to a directory in your PATH
 sudo mv jqcompletion $HOME/.local/bin
-
-# Verify installation
-jqcompletion --version
 ```
 
 Or
