@@ -10,6 +10,25 @@ Hobby project to learn Go by creating some tools.
 - [ ] Add jq keyword completion, e.g., length, select, etc.
 
 ## Installation
+
+Download binary
+```
+LATEST=v0.0.1
+
+# For linux amd64 architecture
+curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jqcompletion_${LATEST#v}_linux_amd64.tar.gz" | tar -xz
+
+# For macOS arm64 architecture
+curl -L "https://github.com/matsuren/jqcompletion/releases/download/${LATEST}/jqcompletion_${LATEST#v}_darwin_arm64.tar.gz" | tar -xz
+
+# Move to a directory in your PATH
+sudo mv jqcompletion $HOME/.local/bin
+
+# Verify installation
+jqcompletion --version
+```
+
+Or
 ```
 go install github.com/matsuren/jqcompletion
 ```
