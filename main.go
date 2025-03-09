@@ -25,9 +25,7 @@ func main() {
 		jsonPath = os.Args[1]
 	}
 
-	m := initializeModel()
-    m.LoadJsonFile(jsonPath)
-    m.SetJsonDataInView(m.jsonData)
+	m := initializeModelWithJsonFile(jsonPath)
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)

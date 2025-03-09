@@ -11,6 +11,29 @@ import (
 	"github.com/sahilm/fuzzy"
 )
 
+type KeySearchEngine struct{
+    keys []string
+}
+
+func (e KeySearchEngine) Query(query string) []string{
+    return FuzzyFind(query, e.keys)
+}
+
+func FuzzyFind(query string, candidates []string) []string {
+	if len(candidates) == 0 {
+		return nil
+	}
+	if query == "" {
+		return candidates
+	}
+	matches := fuzzy.Find(query, candidates)
+	result := make([]string, 0, len(matches))
+	for _, match := range matches {
+		result = append(result, match.Str)
+	}
+	return result
+}
+
 var (
 	logLevel = new(slog.LevelVar)
 	logger   = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -95,20 +118,6 @@ func GetUnnestedKeys(jsonData interface{}) ([]string, error) {
 	return slices.Compact(joinedPaths), nil
 }
 
-func FuzzyFind(query string, candidates []string) []string {
-	if len(candidates) == 0 {
-		return nil
-	}
-	if query == "" {
-		return candidates
-	}
-	matches := fuzzy.Find(query, candidates)
-	result := make([]string, 0, len(matches))
-	for _, match := range matches {
-		result = append(result, match.Str)
-	}
-	return result
-}
 
 func JoinPath(v []interface{}) string {
 	joinedPath := ""

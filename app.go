@@ -59,6 +59,23 @@ func initializeModel() model {
 	}
 }
 
+func initializeModelWithJsonFile(jsonPath string) model {
+	m := initializeModel()
+
+	m.LoadJsonFile(jsonPath)
+	m.setJsonDataInView(m.jsonData)
+
+	keys, err := GetUnnestedKeys(m.jsonData)
+	if err != nil {
+		panic(err)
+	}
+	engine := KeySearchEngine{
+		keys: keys,
+	}
+	m.queryView.SetEngine(engine)
+	return m
+}
+
 func (m *model) LoadJsonFile(jsonPath string) {
 	log.Println("Loading ", jsonPath)
 	// Read the JSON file
@@ -76,7 +93,7 @@ func (m *model) LoadJsonFile(jsonPath string) {
 	log.Println("Done LoadJsonFile")
 }
 
-func (m *model) SetJsonDataInView(jsonData interface{}) {
+func (m *model) setJsonDataInView(jsonData interface{}) {
 	log.Println("Start json.MarshalIndent")
 	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {

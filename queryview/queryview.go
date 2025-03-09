@@ -24,7 +24,7 @@ type (
 )
 
 const (
-	debounceDuration = 200 * time.Millisecond
+	debounceDuration = 100 * time.Millisecond
 	// TODO: bubbles.list might be better
 	maxNumberOfElements = 10
 	uiWidth             = 50
