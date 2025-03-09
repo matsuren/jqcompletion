@@ -1,12 +1,10 @@
 package jsonview
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -16,6 +14,7 @@ type Model struct {
 
 var borderStyle = lipgloss.NewStyle().
 	PaddingRight(2).
+	Width(80).
 	Border(lipgloss.NormalBorder())
 
 func New(width, height int) Model {
@@ -26,17 +25,11 @@ func New(width, height int) Model {
 }
 
 func (m *Model) SetContent(content string) {
-	// enableSyntaxHighlight := false // Too slow in large file
 	maxLength := 10000
 	log.Printf("len(content) = %v, maxLength = %v", len(content), maxLength)
-	enableSyntaxHighlight := len(content) < maxLength
-	if enableSyntaxHighlight {
-		markdown := "```json\n" + content + "\n```"
-		out, err := glamour.Render(markdown, "dark")
-		if err != nil {
-			m.viewport.SetContent(fmt.Sprintf("Error: %v", err))
-		}
-		m.viewport.SetContent(borderStyle.Render(out))
+	if len(content) < maxLength {
+		// Too slow for large file
+		m.viewport.SetContent(borderStyle.Render(content))
 	} else {
 		m.viewport.SetContent(content)
 	}
