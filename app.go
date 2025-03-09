@@ -26,9 +26,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	needUpdateOutputView := false
 	query := ""
 
-	log.Printf("Start")
-
 	var cmds []tea.Cmd
+	// Update window size
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.jsonKeyView.SetWidth(msg.Width / 2)
+		m.jsonOutputView.SetWidth(msg.Width / 2)
+		m.jsonOutputView.SetHeight(msg.Height)
+	}
 
 	// Update queryView
 	oldValue := m.jsonKeyView.SelectedValue()
@@ -40,7 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	cmds = append(cmds, cmd)
 
-    // Selection is changed
+	// Selection is changed
 	if oldValue != m.jsonKeyView.SelectedValue() {
 		needUpdateOutputView = true
 		query = m.jsonKeyView.SelectedValue()

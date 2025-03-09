@@ -8,7 +8,9 @@ import (
 )
 
 func main() {
-	if os.Getenv("DEBUGLOG") != "" {
+    // Log default true now
+    // TODO: Disable this behavior
+	if true || os.Getenv("DEBUGLOG") != "" {
 		f, err := tea.LogToFile("debug.log", "main")
 		if err != nil {
 			fmt.Println("Couldn't open a file for logging:", err)

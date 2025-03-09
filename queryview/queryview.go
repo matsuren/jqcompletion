@@ -17,6 +17,7 @@ type Model struct {
 	currentQuery  string
 	engine        Engine
 	comment       string
+	style         lipgloss.Style
 }
 
 type (
@@ -55,11 +56,6 @@ func performQuery(query string, engine Engine) tea.Cmd {
 	}
 }
 
-var borderStyle = lipgloss.NewStyle().
-	Padding(0, 0).
-	Width(uiWidth).
-	Border(lipgloss.NormalBorder())
-
 func New() Model {
 	ti := textinput.New()
 	ti.Focus()
@@ -68,7 +64,17 @@ func New() Model {
 		queryInput:    ti,
 		candidateList: []string{},
 		selected:      0,
+
+		style: lipgloss.NewStyle().
+			Padding(0, 0).
+			Width(uiWidth).
+			Border(lipgloss.NormalBorder()),
 	}
+}
+
+func (m *Model) SetWidth(width int) {
+	m.style = m.style.Width(width)
+	m.queryInput.Width = width
 }
 
 func (m Model) Init() tea.Cmd {
@@ -122,7 +128,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) queryInputView() string {
-	return borderStyle.Render(m.queryInput.View() + "\n" + m.comment)
+	return m.style.Render(m.queryInput.View() + "\n" + m.comment)
 }
 
 func (m Model) candidateListView() string {
@@ -140,7 +146,9 @@ func (m Model) candidateListView() string {
 			break
 		}
 	}
-	return borderStyle.Render(s)
+	log.Printf("Width %#v", m.style.GetWidth())
+
+	return m.style.Render(s)
 }
 
 func (m Model) View() string {
@@ -161,6 +169,7 @@ func (m Model) CurrentQuery() string {
 func (m *Model) SetQueryInput(query string) {
 	m.queryInput.SetValue(query)
 }
+
 func (m *Model) SetComment(comment string) {
 	m.comment = comment
 }
