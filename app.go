@@ -14,7 +14,7 @@ import (
 type model struct {
 	jsonKeyView    queryview.Model
 	jsonOutputView jsonview.Model
-	rawJsonData       interface{}
+	rawJsonData    interface{}
 }
 
 func (m model) Init() tea.Cmd {
@@ -22,8 +22,29 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Query for json output view
+	needUpdateOutputView := false
+	query := ""
+
 	log.Printf("Start")
+
 	var cmds []tea.Cmd
+
+	// Update queryView
+	oldValue := m.jsonKeyView.SelectedValue()
+	queryViewModel, cmd := m.jsonKeyView.Update(msg)
+	if updatedView, ok := queryViewModel.(queryview.Model); ok {
+		m.jsonKeyView = updatedView
+	} else {
+		panic("Wrong type")
+	}
+	cmds = append(cmds, cmd)
+
+    // Selection is changed
+	if oldValue != m.jsonKeyView.SelectedValue() {
+		needUpdateOutputView = true
+		query = m.jsonKeyView.SelectedValue()
+	}
 
 	// Update jsonView
 	jsonViewModel, cmd := m.jsonOutputView.Update(msg)
@@ -34,16 +55,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	cmds = append(cmds, cmd)
 
-	// Update queryView
-	queryViewModel, cmd := m.jsonKeyView.Update(msg)
-	log.Printf("query %#v", cmd)
-	if updatedView, ok := queryViewModel.(queryview.Model); ok {
-		m.jsonKeyView = updatedView
-	} else {
-		panic("Wrong type")
+	// Update json output view by query
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			needUpdateOutputView = true
+			query = m.jsonKeyView.CurrentQuery()
+		}
 	}
-	cmds = append(cmds, cmd)
+
+	if needUpdateOutputView {
+		m = m.UpdateJsonOutputViewByQuery(query)
+	}
+
 	return m, tea.Batch(cmds...)
+}
+
+func (m model) UpdateJsonOutputViewByQuery(query string) model {
+	evalQuery, jsonData := RobustQueryJsonData(query, m.rawJsonData)
+	m.setJsonDataInView(jsonData)
+	// m.jsonKeyView.SetQueryInput(evalQuery)
+	m.jsonKeyView.SetComment("Prev query: " + evalQuery)
+	return m
 }
 
 func (m model) View() string {

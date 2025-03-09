@@ -16,6 +16,7 @@ type Model struct {
 	selected      int
 	currentQuery  string
 	engine        Engine
+	comment       string
 }
 
 type (
@@ -94,8 +95,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyTab:
 			log.Printf("Tab: %#v", msg)
-			if m.selected < len(m.candidateList) {
-				m.queryInput.SetValue(m.candidateList[m.selected])
+			selectedValue := m.SelectedValue()
+			if selectedValue != "" {
+				m.queryInput.SetValue(selectedValue)
+				m.queryInput.CursorEnd()
 			}
 		}
 	case queryRequestMsg:
@@ -119,7 +122,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) queryInputView() string {
-	return borderStyle.Render(m.queryInput.View())
+	return borderStyle.Render(m.queryInput.View() + "\n" + m.comment)
 }
 
 func (m Model) candidateListView() string {
@@ -142,6 +145,24 @@ func (m Model) candidateListView() string {
 
 func (m Model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Left, m.queryInputView(), m.candidateListView())
+}
+
+func (m Model) SelectedValue() string {
+	if m.selected < len(m.candidateList) {
+		return m.candidateList[m.selected]
+	}
+	return ""
+}
+
+func (m Model) CurrentQuery() string {
+	return m.queryInput.Value()
+}
+
+func (m *Model) SetQueryInput(query string) {
+	m.queryInput.SetValue(query)
+}
+func (m *Model) SetComment(comment string) {
+	m.comment = comment
 }
 
 func min(a, b int) int {
