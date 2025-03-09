@@ -18,7 +18,7 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.Batch(m.jsonView.Init(), m.queryView.Init())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

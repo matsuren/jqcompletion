@@ -45,6 +45,9 @@ func requestDebouncedQuery(query string) tea.Cmd {
 }
 
 func performQuery(query string, engine Engine) tea.Cmd {
+	if engine == nil {
+		return nil
+	}
 	return func() tea.Msg {
 		response := engine.Query(query)
 		return queryResponseMsg(response)
@@ -52,7 +55,7 @@ func performQuery(query string, engine Engine) tea.Cmd {
 }
 
 var borderStyle = lipgloss.NewStyle().
-    Padding(0, 0).
+	Padding(0, 0).
 	Width(uiWidth).
 	Border(lipgloss.NormalBorder())
 
@@ -68,7 +71,7 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(textinput.Blink, performQuery("", m.engine))
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -108,7 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.queryInput, cmd = m.queryInput.Update(msg)
 	m.currentQuery = m.queryInput.Value()
-	if originalQueryInputValue != m.currentQuery && m.engine != nil {
+	if originalQueryInputValue != m.currentQuery {
 		log.Printf("old value: %s vs new value: %s", originalQueryInputValue, m.queryInput.Value())
 		return m, tea.Batch(cmd, requestDebouncedQuery(m.currentQuery))
 	}

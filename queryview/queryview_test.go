@@ -39,6 +39,7 @@ type MockEngine struct{}
 
 func (e MockEngine) Query(query string) []string {
 	list := make([]string, 0, len(query))
+	list = append(list, "default 1")
 	for i := 0; i < len(query); i++ {
 		list = append(list, query[:i+1])
 	}
