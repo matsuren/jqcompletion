@@ -25,3 +25,6 @@ go.work.sum
 .env
 # Added by goreleaser init:
 dist/
+
+# bubbletea debug log
+debug.log
