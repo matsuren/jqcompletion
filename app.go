@@ -12,13 +12,13 @@ import (
 )
 
 type model struct {
-	queryView queryview.Model
-	jsonView  jsonview.Model
-	jsonData  interface{}
+	jsonKeyView    queryview.Model
+	jsonOutputView jsonview.Model
+	rawJsonData       interface{}
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.jsonView.Init(), m.queryView.Init())
+	return tea.Batch(m.jsonOutputView.Init(), m.jsonKeyView.Init())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -26,19 +26,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	// Update jsonView
-	jsonViewModel, cmd := m.jsonView.Update(msg)
+	jsonViewModel, cmd := m.jsonOutputView.Update(msg)
 	if updatedView, ok := jsonViewModel.(jsonview.Model); ok {
-		m.jsonView = updatedView
+		m.jsonOutputView = updatedView
 	} else {
 		panic("Wrong type")
 	}
 	cmds = append(cmds, cmd)
 
 	// Update queryView
-	queryViewModel, cmd := m.queryView.Update(msg)
+	queryViewModel, cmd := m.jsonKeyView.Update(msg)
 	log.Printf("query %#v", cmd)
 	if updatedView, ok := queryViewModel.(queryview.Model); ok {
-		m.queryView = updatedView
+		m.jsonKeyView = updatedView
 	} else {
 		panic("Wrong type")
 	}
@@ -47,15 +47,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return lipgloss.JoinHorizontal(lipgloss.Top, m.queryView.View(), m.jsonView.View())
+	return lipgloss.JoinHorizontal(lipgloss.Top, m.jsonKeyView.View(), m.jsonOutputView.View())
 }
 
 func initializeModel() model {
 	qv := queryview.New()
 	jv := jsonview.New(80, 10)
 	return model{
-		queryView: qv,
-		jsonView:  jv,
+		jsonKeyView:    qv,
+		jsonOutputView: jv,
 	}
 }
 
@@ -63,16 +63,16 @@ func initializeModelWithJsonFile(jsonPath string) model {
 	m := initializeModel()
 
 	m.LoadJsonFile(jsonPath)
-	m.setJsonDataInView(m.jsonData)
+	m.setJsonDataInView(m.rawJsonData)
 
-	keys, err := GetUnnestedKeys(m.jsonData)
+	keys, err := GetUnnestedKeys(m.rawJsonData)
 	if err != nil {
 		panic(err)
 	}
 	engine := KeySearchEngine{
 		keys: keys,
 	}
-	m.queryView.SetEngine(engine)
+	m.jsonKeyView.SetEngine(engine)
 	return m
 }
 
@@ -86,7 +86,7 @@ func (m *model) LoadJsonFile(jsonPath string) {
 
 	// Parse the JSON
 	log.Println("Parsing ", jsonPath)
-	err = json.Unmarshal(jsonData, &m.jsonData)
+	err = json.Unmarshal(jsonData, &m.rawJsonData)
 	if err != nil {
 		panic(err)
 	}
@@ -100,6 +100,6 @@ func (m *model) setJsonDataInView(jsonData interface{}) {
 		panic(err)
 	}
 	log.Println("Start SetContent")
-	m.jsonView.SetContent(string(resultBytes))
+	m.jsonOutputView.SetContent(string(resultBytes))
 	log.Println("Done SetJsonDataInView")
 }
