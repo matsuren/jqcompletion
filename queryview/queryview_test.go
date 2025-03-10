@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 
 func initModel() model {
 	component := New()
-	component.candidateList = fakeData
+	component.SetItems(fakeData)
 	return model{component: component}
 }
 

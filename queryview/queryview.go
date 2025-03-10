@@ -1,10 +1,10 @@
 package queryview
 
 import (
-	"fmt"
 	"log"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -12,14 +12,15 @@ import (
 
 type Model struct {
 	queryInput    textinput.Model
-	candidateList []string
-	selected      int
+	list          list.Model
 	currentQuery  string
 	engine        Engine
 	comment       string
 	styleForInput lipgloss.Style
 	styleForList  lipgloss.Style
 }
+
+var mainColor = lipgloss.Color("63")
 
 type (
 	queryRequestMsg  string
@@ -28,9 +29,6 @@ type (
 
 const (
 	debounceDuration = 100 * time.Millisecond
-	// TODO: bubbles.list might be better
-	maxNumberOfElements = 10
-	uiWidth             = 50
 )
 
 type Engine interface {
@@ -60,19 +58,19 @@ func performQuery(query string, engine Engine) tea.Cmd {
 func New() Model {
 	ti := textinput.New()
 	ti.Focus()
+	ti.PromptStyle = ti.PromptStyle.Foreground(mainColor)
+	ti.Prompt = "jq: "
+
+	l := newList(20, 30)
 
 	return Model{
-		queryInput:    ti,
-		candidateList: []string{},
-		selected:      0,
-
+		queryInput: ti,
+		list:       l,
 		styleForInput: lipgloss.NewStyle().
 			Padding(0, 0).
-			Width(uiWidth).
 			Border(lipgloss.NormalBorder()),
 		styleForList: lipgloss.NewStyle().
 			Padding(0, 0).
-			Width(uiWidth).
 			Border(lipgloss.NormalBorder()),
 	}
 }
@@ -94,25 +92,29 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		h := lipgloss.Height(m.queryInputView())
 		m.styleForList = m.styleForList.Width(msg.Width).Height(msg.Height - h)
+		m.list.SetWidth(msg.Width - x)
+		m.list.SetHeight(m.styleForList.GetHeight())
+		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyCtrlP, tea.KeyUp:
-			m.selected = max(m.selected-1, 0)
+			m.list.CursorUp()
 			return m, nil
 		case tea.KeyCtrlN, tea.KeyDown:
-			m.selected = min(m.selected+1, len(m.candidateList)-1)
+			m.list.CursorDown()
 			return m, nil
 
 		case tea.KeyTab:
 			log.Printf("Tab: %#v", msg)
-			selectedValue := m.SelectedValue()
-			if selectedValue != "" {
-				m.queryInput.SetValue(selectedValue)
+			selectedValue, ok := m.list.SelectedItem().(item)
+			if ok {
+				m.queryInput.SetValue(string(selectedValue))
 				m.queryInput.CursorEnd()
 			}
+			return m, nil
 		}
 	case queryRequestMsg:
 		if m.currentQuery == string(msg) {
@@ -120,8 +122,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 	case queryResponseMsg:
-		m.candidateList = []string(msg)
-		m.selected = 0
+		m.SetItems([]string(msg))
 		return m, nil
 	}
 	var cmd tea.Cmd
@@ -135,34 +136,35 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) queryInputView() string {
-	return m.styleForInput.Render(m.queryInput.View() + "\n" + m.comment)
+	comment := m.comment
+	if len(comment) > m.queryInput.Width {
+		comment = comment[:m.queryInput.Width] + ".."
+	}
+	commentStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Dark: "#9B9B9B", Light: "#5C5C5C"})
+	return m.styleForInput.Render(m.queryInput.View() + "\n" + commentStyle.Render(comment))
 }
 
-func (m Model) candidateListView() string {
-	s := "Candidate List\n"
-
-	for i, item := range m.candidateList {
-		cursor := " "
-		if m.selected == i {
-			cursor = "|"
-		}
-		s += fmt.Sprintf("%s %s", cursor, item)
-		s += "\n"
-		if i > maxNumberOfElements {
-			s += "and more...\n"
-			break
-		}
-	}
-	return m.styleForList.Render(s)
+func (m Model) listView() string {
+	return m.styleForList.Render(m.list.View())
 }
 
 func (m Model) View() string {
-	return lipgloss.JoinVertical(lipgloss.Left, m.queryInputView(), m.candidateListView())
+	return lipgloss.JoinVertical(lipgloss.Left, m.queryInputView(), m.listView())
+}
+
+func (m *Model) SetItems(items []string) {
+	listItems := make([]list.Item, 0, len(items))
+	for _, listitem := range items {
+		listItems = append(listItems, item(listitem))
+	}
+	m.list.SetItems(listItems)
+	m.list.ResetSelected()
 }
 
 func (m Model) SelectedValue() string {
-	if m.selected < len(m.candidateList) {
-		return m.candidateList[m.selected]
+	selectedValue, ok := m.list.SelectedItem().(item)
+	if ok {
+		return string(selectedValue)
 	}
 	return ""
 }

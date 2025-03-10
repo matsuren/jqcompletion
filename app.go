@@ -46,6 +46,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if oldValue != m.jsonKeyView.SelectedValue() {
 		needUpdateOutputView = true
 		query = m.jsonKeyView.SelectedValue()
+        log.Printf("old value: %v vs new value: %v", oldValue, query)
 	}
 
 	m.jsonOutputView, cmd = m.jsonOutputView.Update(msg)
