@@ -2,6 +2,8 @@
 package jsonview
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,6 +44,19 @@ const content = `
 }
 `
 
+func TestMain(m *testing.M) {
+	if os.Getenv("DEBUGLOG") != "" {
+		f, err := tea.LogToFile("debug.log", "jsonview")
+		if err != nil {
+			fmt.Println("Couldn't open a file for logging:", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+	}
+
+	m.Run()
+}
+
 func TestUIJsonView(t *testing.T) {
 	model := New(100, 20)
 	model.SetContent(content)
@@ -53,4 +68,3 @@ func TestUIJsonView(t *testing.T) {
 		t.Error(err)
 	}
 }
-

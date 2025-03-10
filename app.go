@@ -21,6 +21,25 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(m.jsonOutputView.Init(), m.jsonKeyView.Init())
 }
 
+func (m model) UpdateChildViews(msg tea.Msg, cmds []tea.Cmd) (model, []tea.Cmd) {
+	queryViewModel, cmd := m.jsonKeyView.Update(msg)
+	if updatedView, ok := queryViewModel.(queryview.Model); ok {
+		m.jsonKeyView = updatedView
+		cmds = append(cmds, cmd)
+	} else {
+		panic("Wrong type")
+	}
+
+	jsonViewModel, cmd := m.jsonOutputView.Update(msg)
+	if updatedView, ok := jsonViewModel.(jsonview.Model); ok {
+		m.jsonOutputView = updatedView
+		cmds = append(cmds, cmd)
+	} else {
+		panic("Wrong type")
+	}
+	return m, cmds
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Query for json output view
 	needUpdateOutputView := false
@@ -30,35 +49,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Update window size
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.jsonKeyView.SetWidth(msg.Width / 2)
-		m.jsonOutputView.SetWidth(msg.Width / 2)
-		m.jsonOutputView.SetHeight(msg.Height)
+		log.Printf("Size msg in main: %#v", msg)
+		margin := 2
+		msgForChild := tea.WindowSizeMsg{Width: msg.Width/2 - margin, Height: msg.Height - margin}
+		m, cmds = m.UpdateChildViews(msgForChild, cmds)
+		return m, nil
 	}
 
 	// Update queryView
 	oldValue := m.jsonKeyView.SelectedValue()
-	queryViewModel, cmd := m.jsonKeyView.Update(msg)
-	if updatedView, ok := queryViewModel.(queryview.Model); ok {
-		m.jsonKeyView = updatedView
-	} else {
-		panic("Wrong type")
-	}
-	cmds = append(cmds, cmd)
-
+	m, cmds = m.UpdateChildViews(msg, cmds)
 	// Selection is changed
 	if oldValue != m.jsonKeyView.SelectedValue() {
 		needUpdateOutputView = true
 		query = m.jsonKeyView.SelectedValue()
 	}
-
-	// Update jsonView
-	jsonViewModel, cmd := m.jsonOutputView.Update(msg)
-	if updatedView, ok := jsonViewModel.(jsonview.Model); ok {
-		m.jsonOutputView = updatedView
-	} else {
-		panic("Wrong type")
-	}
-	cmds = append(cmds, cmd)
 
 	// Update json output view by query
 	switch msg := msg.(type) {

@@ -17,7 +17,8 @@ type Model struct {
 	currentQuery  string
 	engine        Engine
 	comment       string
-	style         lipgloss.Style
+	styleForInput lipgloss.Style
+	styleForList  lipgloss.Style
 }
 
 type (
@@ -65,16 +66,15 @@ func New() Model {
 		candidateList: []string{},
 		selected:      0,
 
-		style: lipgloss.NewStyle().
+		styleForInput: lipgloss.NewStyle().
+			Padding(0, 0).
+			Width(uiWidth).
+			Border(lipgloss.NormalBorder()),
+		styleForList: lipgloss.NewStyle().
 			Padding(0, 0).
 			Width(uiWidth).
 			Border(lipgloss.NormalBorder()),
 	}
-}
-
-func (m *Model) SetWidth(width int) {
-	m.style = m.style.Width(width)
-	m.queryInput.Width = width
 }
 
 func (m Model) Init() tea.Cmd {
@@ -88,6 +88,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		log.Printf("WindowSize: %#v", msg)
+		m.styleForInput = m.styleForInput.Width(msg.Width)
+		x, _ := m.styleForInput.GetFrameSize()
+		m.queryInput.Width = msg.Width - x
+
+		h := lipgloss.Height(m.queryInputView())
+		m.styleForList = m.styleForList.Width(msg.Width).Height(msg.Height - h)
+
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
@@ -128,7 +135,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) queryInputView() string {
-	return m.style.Render(m.queryInput.View() + "\n" + m.comment)
+	return m.styleForInput.Render(m.queryInput.View() + "\n" + m.comment)
 }
 
 func (m Model) candidateListView() string {
@@ -146,9 +153,7 @@ func (m Model) candidateListView() string {
 			break
 		}
 	}
-	log.Printf("Width %#v", m.style.GetWidth())
-
-	return m.style.Render(s)
+	return m.styleForList.Render(s)
 }
 
 func (m Model) View() string {

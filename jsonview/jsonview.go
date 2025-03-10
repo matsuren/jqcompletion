@@ -11,6 +11,7 @@ import (
 type Model struct {
 	viewport viewport.Model
 	style    lipgloss.Style
+	content  string
 }
 
 func New(width, height int) Model {
@@ -24,23 +25,8 @@ func New(width, height int) Model {
 	}
 }
 
-func (m *Model) SetWidth(width int) {
-	m.style = m.style.Width(width -3)
-	m.viewport.Width = width
-}
-func (m *Model) SetHeight(height int) {
-	m.viewport.Height = height
-}
-
 func (m *Model) SetContent(content string) {
-	maxLength := 10000
-	log.Printf("len(content) = %v, maxLength = %v", len(content), maxLength)
-	if len(content) < maxLength {
-		// Too slow for large file
-		m.viewport.SetContent(m.style.Render(content))
-	} else {
-		m.viewport.SetContent(content)
-	}
+	m.viewport.SetContent(content)
 }
 
 func (m Model) Init() tea.Cmd {
@@ -49,6 +35,14 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.style = m.style.Width(msg.Width).Height(msg.Height)
+		x, y := m.style.GetFrameSize()
+		m.viewport.Width = msg.Width - x
+		m.viewport.Height = msg.Height - y
+		log.Printf("JsonView msg: %#v", msg)
+		return m, nil
+
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
@@ -60,5 +54,5 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.viewport.View()
+	return m.style.Render(m.viewport.View())
 }
