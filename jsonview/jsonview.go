@@ -37,9 +37,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.style = m.style.Width(msg.Width).Height(msg.Height)
-		x, y := m.style.GetFrameSize()
+		x, _ := m.style.GetFrameSize()
 		m.viewport.Width = msg.Width - x
-		m.viewport.Height = msg.Height - y
+		m.viewport.Height = msg.Height
 		log.Printf("JsonView msg: %#v", msg)
 		return m, nil
 
