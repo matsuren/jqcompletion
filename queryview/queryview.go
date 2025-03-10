@@ -13,7 +13,6 @@ import (
 type Model struct {
 	queryInput    textinput.Model
 	list          list.Model
-	currentQuery  string
 	engine        Engine
 	comment       string
 	styleForInput lipgloss.Style
@@ -117,8 +116,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, nil
 		}
 	case queryRequestMsg:
-		if m.currentQuery == string(msg) {
-			return m, performQuery(m.currentQuery, m.engine)
+		if m.queryInput.Value() == string(msg) {
+			return m, performQuery(m.queryInput.Value(), m.engine)
 		}
 
 	case queryResponseMsg:
@@ -127,10 +126,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	m.queryInput, cmd = m.queryInput.Update(msg)
-	m.currentQuery = m.queryInput.Value()
-	if originalQueryInputValue != m.currentQuery {
+	if originalQueryInputValue != m.queryInput.Value() {
 		log.Printf("old value: %s vs new value: %s", originalQueryInputValue, m.queryInput.Value())
-		return m, tea.Batch(cmd, requestDebouncedQuery(m.currentQuery))
+		return m, tea.Batch(cmd, requestDebouncedQuery(m.queryInput.Value()))
 	}
 	return m, cmd
 }
