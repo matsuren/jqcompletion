@@ -81,7 +81,7 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(textinput.Blink, performQuery("", m.engine))
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	// Save original to detect changes
 	originalQueryInputValue := m.queryInput.Value()
 

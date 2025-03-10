@@ -21,49 +21,35 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(m.jsonOutputView.Init(), m.jsonKeyView.Init())
 }
 
-func (m model) UpdateChildViews(msg tea.Msg, cmds []tea.Cmd) (model, []tea.Cmd) {
-	queryViewModel, cmd := m.jsonKeyView.Update(msg)
-	if updatedView, ok := queryViewModel.(queryview.Model); ok {
-		m.jsonKeyView = updatedView
-		cmds = append(cmds, cmd)
-	} else {
-		panic("Wrong type")
-	}
-
-	jsonViewModel, cmd := m.jsonOutputView.Update(msg)
-	if updatedView, ok := jsonViewModel.(jsonview.Model); ok {
-		m.jsonOutputView = updatedView
-		cmds = append(cmds, cmd)
-	} else {
-		panic("Wrong type")
-	}
-	return m, cmds
-}
-
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Query for json output view
 	needUpdateOutputView := false
 	query := ""
 
-	var cmds []tea.Cmd
 	// Update window size
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		log.Printf("Size msg in main: %#v", msg)
 		margin := 2
 		msgForChild := tea.WindowSizeMsg{Width: msg.Width/2 - margin, Height: msg.Height - margin}
-		m, cmds = m.UpdateChildViews(msgForChild, cmds)
+		m.jsonKeyView, _ = m.jsonKeyView.Update(msgForChild)
+		m.jsonOutputView, _ = m.jsonOutputView.Update(msgForChild)
 		return m, nil
 	}
 
-	// Update queryView
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
 	oldValue := m.jsonKeyView.SelectedValue()
-	m, cmds = m.UpdateChildViews(msg, cmds)
+	m.jsonKeyView, cmd = m.jsonKeyView.Update(msg)
+	cmds = append(cmds, cmd)
 	// Selection is changed
 	if oldValue != m.jsonKeyView.SelectedValue() {
 		needUpdateOutputView = true
 		query = m.jsonKeyView.SelectedValue()
 	}
+
+	m.jsonOutputView, cmd = m.jsonOutputView.Update(msg)
+	cmds = append(cmds, cmd)
 
 	// Update json output view by query
 	switch msg := msg.(type) {

@@ -24,9 +24,14 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+func initModel() model {
+	component := New()
+	component.candidateList = fakeData
+	return model{component: component}
+}
+
 func TestUIOnlyView(t *testing.T) {
-	model := New()
-	model.candidateList = fakeData
+	model := initModel()
 	if _, err := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),
@@ -46,10 +51,33 @@ func (e MockEngine) Query(query string) []string {
 	return list
 }
 
-func TestUIDebounceQuery(t *testing.T) {
-	model := New()
+func initModelWithMockEngine() model {
+	component := New()
 	engine := MockEngine{}
-	model.SetEngine(engine)
+	component.SetEngine(engine)
+	return model{component: component}
+}
+
+type model struct {
+	component Model
+}
+
+func (m model) Init() tea.Cmd {
+	return nil
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.component, cmd = m.component.Update(msg)
+	return m, cmd
+}
+
+func (m model) View() string {
+	return m.component.View()
+}
+
+func TestUIDebounceQuery(t *testing.T) {
+	model := initModelWithMockEngine()
 	if _, err := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),

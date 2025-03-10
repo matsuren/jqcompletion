@@ -57,9 +57,32 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+func initModel() model {
+	component := New(80, 20)
+	component.SetContent(content)
+	return model{component: component}
+}
+
+type model struct {
+	component Model
+}
+
+func (m model) Init() tea.Cmd {
+	return nil
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.component, cmd = m.component.Update(msg)
+	return m, cmd
+}
+
+func (m model) View() string {
+	return m.component.View()
+}
+
 func TestUIJsonView(t *testing.T) {
-	model := New(100, 20)
-	model.SetContent(content)
+	model := initModel()
 	if _, err := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),
