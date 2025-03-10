@@ -22,8 +22,9 @@ type Model struct {
 var mainColor = lipgloss.Color("63")
 
 type (
-	queryRequestMsg  string
-	queryResponseMsg []string
+	SelectionChangedMsg string
+	queryRequestMsg     string
+	queryResponseMsg    []string
 )
 
 const (
@@ -101,10 +102,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, tea.Quit
 		case tea.KeyCtrlP, tea.KeyUp:
 			m.list.CursorUp()
-			return m, nil
+			return m, m.selectionChanged()
 		case tea.KeyCtrlN, tea.KeyDown:
 			m.list.CursorDown()
-			return m, nil
+			return m, m.selectionChanged()
 
 		case tea.KeyTab:
 			log.Printf("Tab: %#v", msg)
@@ -122,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	case queryResponseMsg:
 		m.SetItems([]string(msg))
-		return m, nil
+		return m, m.selectionChanged()
 	}
 	var cmd tea.Cmd
 	m.queryInput, cmd = m.queryInput.Update(msg)
@@ -165,6 +166,13 @@ func (m Model) SelectedValue() string {
 		return string(selectedValue)
 	}
 	return ""
+}
+
+func (m Model) selectionChanged() tea.Cmd {
+	log.Printf("Changed to new value: %v", m.SelectedValue())
+	return func() tea.Msg {
+		return SelectionChangedMsg(m.SelectedValue())
+	}
 }
 
 func (m Model) CurrentQuery() string {
