@@ -22,14 +22,27 @@ func main() {
 		log.SetFlags(0)
 	}
 
-	var jsonPath string
-	if len(os.Args) == 1 {
-		fmt.Println("Usage: jqcompletion <json_file_path>")
+	jsonPath, err := getTempJsonPath()
+	if err != nil {
+		fmt.Printf("Got err: %v", err)
 		os.Exit(0)
-	} else {
-		jsonPath = os.Args[1]
 	}
-
+	defer os.Remove(jsonPath)
+	if len(os.Args) == 2 {
+		err := copyFile(os.Args[1], jsonPath)
+		if err != nil {
+			fmt.Printf("Got err: %v", err)
+			os.Exit(0)
+		}
+	}
+	if len(os.Args) == 1 {
+		cmd := editFileExecCmd(jsonPath)
+		err := cmd.Run()
+		if err != nil {
+			fmt.Printf("Got err: %v", err)
+			os.Exit(0)
+		}
+	}
 	m := initializeModelWithJsonFile(jsonPath)
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
