@@ -8,12 +8,26 @@ import (
 	"time"
 )
 
+type editorFinishedMsg struct {
+	tempJsonPath string
+	err          error
+}
+
 func editFileExecCmd(filepath string) *exec.Cmd {
+	return editorFileExecCmd(filepath, false)
+}
+
+func editorFileExecCmd(filepath string, readOnly bool) *exec.Cmd {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vim"
 	}
-	c := exec.Command(editor, filepath)
+	var c *exec.Cmd
+	if readOnly && (editor == "vim" || editor == "nvim") {
+		c = exec.Command(editor, "-R", filepath)
+	} else {
+		c = exec.Command(editor, filepath)
+	}
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	return c
@@ -29,7 +43,7 @@ func copyFile(src, dst string) error {
 	// Open the source file
 	sourceFile, err := os.Open(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error open source file: %w", err)
 	}
 	defer sourceFile.Close()
 
@@ -37,14 +51,14 @@ func copyFile(src, dst string) error {
 	// The os.O_TRUNC flag ensures any existing file is truncated (overwritten)
 	destFile, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o666)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error open dest file: %w", err)
 	}
 	defer destFile.Close()
 
 	// Copy the contents
 	_, err = io.Copy(destFile, sourceFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error copy files: %w", err)
 	}
 
 	return nil

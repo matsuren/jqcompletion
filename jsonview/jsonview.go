@@ -35,7 +35,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		// FIXME: Somehow margin is needed to avoid hidden top
-		margin := 2
+		margin := 3
 		m.style = m.style.Width(msg.Width - margin).Height(msg.Height - margin)
 		x, _ := m.style.GetFrameSize()
 		m.viewport.Width = m.style.GetWidth() - x

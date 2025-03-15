@@ -193,3 +193,61 @@ func jsonDataToStrings(jsonData interface{}) string {
 	}
 	return string(resultBytes)
 }
+
+func TestLoadJsonFile(t *testing.T) {
+	t.Run("Valid JSON File", func(t *testing.T) {
+		// Create a temporary JSON file
+		tmpFile, err := os.CreateTemp("", "jqctest*.json")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		jsonContent := `{"key": "value"}`
+		if _, err := tmpFile.Write([]byte(jsonContent)); err != nil {
+			t.Fatalf("Failed to write to temp file: %v", err)
+		}
+		tmpFile.Close()
+
+		// Call the function
+		result, err := LoadJsonFile(tmpFile.Name())
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
+		// Verify the result
+		expected := map[string]interface{}{"key": "value"}
+		if result == nil {
+			t.Errorf("Expected non-nil result")
+		}
+
+		if !reflect.DeepEqual(jsonDataToStrings(result), jsonDataToStrings(expected)) {
+			t.Errorf("Got %v, want %v", result, expected)
+		}
+	})
+
+	t.Run("Invalid JSON File", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "invalid.json")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		if _, err := tmpFile.Write([]byte("invalid json")); err != nil {
+			t.Fatalf("Failed to write to temp file: %v", err)
+		}
+		tmpFile.Close()
+
+		_, err = LoadJsonFile(tmpFile.Name())
+		if err == nil {
+			t.Errorf("Expected an error for invalid JSON but got none")
+		}
+	})
+
+	t.Run("Non-Existent File", func(t *testing.T) {
+		_, err := LoadJsonFile("non_existent_file.json")
+		if err == nil {
+			t.Errorf("Expected an error for non-existent file but got none")
+		}
+	})
+}
