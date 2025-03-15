@@ -22,7 +22,7 @@ func main() {
 	var jsonPath string
 	if len(os.Args) == 1 {
 		fmt.Println("Usage: jqcompletion <json_file_path>")
-	       os.Exit(0)
+	    os.Exit(0)
 	} else {
 		jsonPath = os.Args[1]
 	}
