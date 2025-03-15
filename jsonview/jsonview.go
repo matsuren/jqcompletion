@@ -11,7 +11,6 @@ import (
 type Model struct {
 	viewport viewport.Model
 	style    lipgloss.Style
-	content  string
 }
 
 func New(width, height int) Model {

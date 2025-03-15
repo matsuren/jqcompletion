@@ -66,7 +66,6 @@ func TestGetUnnestedKeys(t *testing.T) {
 	want := []string{".status", ".user.age", ".user.name"}
 
 	got, err := GetUnnestedKeys(input)
-
 	// Check error cases
 	if err != nil {
 		t.Errorf("Got error: %v", err)

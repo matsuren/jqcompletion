@@ -186,17 +186,3 @@ func (m *Model) SetQueryInput(query string) {
 func (m *Model) SetComment(comment string) {
 	m.comment = comment
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}

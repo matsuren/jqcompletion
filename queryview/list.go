@@ -25,7 +25,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	}
 	style := lipgloss.NewStyle().PaddingLeft(3)
 	frameX, _ := style.GetFrameSize()
-	str := fmt.Sprintf("%s", i)
+	str := string(i)
 	if len(str)+frameX > m.Width() {
 		prefix := "…"
 		str = prefix + str[len(str)-m.Width()+frameX+len(prefix):]

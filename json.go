@@ -11,12 +11,12 @@ import (
 	"github.com/sahilm/fuzzy"
 )
 
-type KeySearchEngine struct{
-    keys []string
+type KeySearchEngine struct {
+	keys []string
 }
 
-func (e KeySearchEngine) Query(query string) []string{
-    return FuzzyFind(query, e.keys)
+func (e KeySearchEngine) Query(query string) []string {
+	return FuzzyFind(query, e.keys)
 }
 
 func FuzzyFind(query string, candidates []string) []string {
@@ -117,7 +117,6 @@ func GetUnnestedKeys(jsonData interface{}) ([]string, error) {
 	slices.Sort(joinedPaths)
 	return slices.Compact(joinedPaths), nil
 }
-
 
 func JoinPath(v []interface{}) string {
 	joinedPath := ""
