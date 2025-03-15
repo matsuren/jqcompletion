@@ -24,14 +24,14 @@ func main() {
 
 	jsonPath, err := getTempJsonPath()
 	if err != nil {
-		fmt.Printf("Got err: %v", err)
+		fmt.Print(err)
 		os.Exit(0)
 	}
 	defer os.Remove(jsonPath)
 	if len(os.Args) == 2 {
 		err := copyFile(os.Args[1], jsonPath)
 		if err != nil {
-			fmt.Printf("Got err: %v", err)
+			fmt.Print(err)
 			os.Exit(0)
 		}
 	}
@@ -39,14 +39,14 @@ func main() {
 		cmd := editFileExecCmd(jsonPath)
 		err := cmd.Run()
 		if err != nil {
-			fmt.Printf("Got err: %v", err)
+			fmt.Print(err)
 			os.Exit(0)
 		}
 	}
 	m := initializeModel()
 	jsonData, err := LoadJsonFile(jsonPath)
 	if err != nil {
-		fmt.Printf("Failed to load json: %v", err)
+		fmt.Print(err)
 		os.Exit(0)
 	}
 	m.LoadJsonData(jsonData)

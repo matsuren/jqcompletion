@@ -25,14 +25,14 @@ func LoadJsonFile(jsonPath string) (interface{}, error) {
 	// Read the JSON file
 	jsonData, err := os.ReadFile(jsonPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading file: %w", err)
 	}
 	// Parse the JSON
 	logger.Debug("Parsing:", "jsonPath", jsonPath)
 	var rawJsonData interface{}
 	err = json.Unmarshal(jsonData, &rawJsonData)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error unmarshalling JSON: %w", err)
 	}
 	logger.Debug("Done LoadJsonFile")
 	return rawJsonData, nil
