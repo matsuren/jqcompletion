@@ -87,7 +87,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		log.Printf("queryview: WindowSize: %#v", msg)
 		// FIXME: Somehow margin is needed to avoid hidden top
-		margin := 2
+		margin := 3
 		m.styleForInput = m.styleForInput.Width(msg.Width - margin)
 		x, _ := m.styleForInput.GetFrameSize()
 		m.queryInput.Width = m.styleForInput.GetWidth() - x
