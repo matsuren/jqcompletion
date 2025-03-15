@@ -76,7 +76,7 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(textinput.Blink, performQuery("", m.engine))
+	return tea.Batch(textinput.Blink, performQuery(".", m.engine))
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {

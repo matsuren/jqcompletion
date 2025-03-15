@@ -87,6 +87,8 @@ func (m *model) LoadJsonData(jsonData interface{}) {
 	if err != nil {
 		panic(err)
 	}
+	// Add `.` to query everything
+	keys = append([]string{"."}, keys...)
 	engine := KeySearchEngine{
 		keys: keys,
 	}
