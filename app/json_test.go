@@ -143,7 +143,7 @@ func TestRobustQueryJsonData(t *testing.T) {
 func TestRobustQueryJsonData2(t *testing.T) {
 	SetLogLevel(slog.LevelInfo)
 
-	filePath := "./data/sample.json"
+	filePath := "../data/sample.json"
 	jsonData, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Error reading file: %v\n", err)
