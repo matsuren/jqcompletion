@@ -77,18 +77,7 @@ func initializeModel() model {
 
 func initializeModelWithJsonFile(jsonPath string) model {
 	m := initializeModel()
-
 	m.LoadJsonFile(jsonPath)
-	m.setJsonDataInView(m.rawJsonData)
-
-	keys, err := GetUnnestedKeys(m.rawJsonData)
-	if err != nil {
-		panic(err)
-	}
-	engine := KeySearchEngine{
-		keys: keys,
-	}
-	m.jsonKeyView.SetEngine(engine)
 	return m
 }
 
@@ -99,14 +88,33 @@ func (m *model) LoadJsonFile(jsonPath string) {
 	if err != nil {
 		panic(err)
 	}
-
 	// Parse the JSON
 	log.Println("Parsing ", jsonPath)
-	err = json.Unmarshal(jsonData, &m.rawJsonData)
+	var rawJsonData interface{}
+	err = json.Unmarshal(jsonData, &rawJsonData)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Done LoadJsonFile")
+	m.LoadJsonData(rawJsonData)
+}
+
+func (m *model) LoadJsonData(jsonData interface{}) {
+	// Set rawJsonData
+	m.rawJsonData = jsonData
+
+	// Output view
+	m.setJsonDataInView(m.rawJsonData)
+
+	// Query view
+	keys, err := GetUnnestedKeys(m.rawJsonData)
+	if err != nil {
+		panic(err)
+	}
+	engine := KeySearchEngine{
+		keys: keys,
+	}
+	m.jsonKeyView.SetEngine(engine)
 }
 
 func (m *model) setJsonDataInView(jsonData interface{}) {
