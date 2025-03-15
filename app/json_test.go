@@ -63,7 +63,7 @@ func TestGetUnnestedKeys(t *testing.T) {
 		},
 		"status": "active",
 	}
-	want := []string{".status", ".user.age", ".user.name"}
+	want := []string{".status", ".user", ".user.age", ".user.name"}
 
 	got, err := GetUnnestedKeys(input)
 	// Check error cases
@@ -78,7 +78,7 @@ func TestGetUnnestedKeys(t *testing.T) {
 
 	// Use reflect.DeepEqual for comparison
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got %v, want %v", got, input)
+		t.Errorf("Got %v, want %v", got, want)
 	}
 }
 

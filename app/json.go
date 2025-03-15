@@ -85,7 +85,7 @@ func GetKeys(jsonData interface{}) ([]string, error) {
 }
 
 func GetUnnestedKeys(jsonData interface{}) ([]string, error) {
-	query, err := gojq.Parse(". | paths(arrays, scalars, booleans)")
+	query, err := gojq.Parse(". | paths")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse query: %w", err)
 	}
