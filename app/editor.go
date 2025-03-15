@@ -8,12 +8,26 @@ import (
 	"time"
 )
 
+type editorFinishedMsg struct {
+	tempJsonPath string
+	err          error
+}
+
 func editFileExecCmd(filepath string) *exec.Cmd {
+	return editorFileExecCmd(filepath, false)
+}
+
+func editorFileExecCmd(filepath string, readOnly bool) *exec.Cmd {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vim"
 	}
-	c := exec.Command(editor, filepath)
+	var c *exec.Cmd
+	if readOnly && (editor == "vim" || editor == "nvim") {
+		c = exec.Command(editor, "-R", filepath)
+	} else {
+		c = exec.Command(editor, filepath)
+	}
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	return c

@@ -15,6 +15,8 @@ type model struct {
 	jsonKeyView    queryview.Model
 	jsonOutputView jsonview.Model
 	rawJsonData    interface{}
+	queryEval      string
+	queryHist      string
 }
 
 func (m model) Init() tea.Cmd {
@@ -36,12 +38,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m = m.UpdateJsonOutputViewByQuery(selectedValue)
 		return m, nil
 	case tea.KeyMsg:
+		log.Printf("app: KeyMsg: %#v", msg)
 		switch msg.Type {
 		case tea.KeyEnter:
 			query := m.jsonKeyView.CurrentQuery()
 			m = m.UpdateJsonOutputViewByQuery(query)
 			return m, nil
+		case tea.KeyCtrlS:
+			// Reload based on current query
+			evalQuery, jsonData := RobustQueryJsonData(m.queryEval, m.rawJsonData)
+			m.queryHist += evalQuery + "|"
+			return m, readOnlyFileExecTeaCmd(jsonData)
 		}
+	case editorFinishedMsg:
+		if msg.err != nil {
+			panic(msg.err)
+		}
+		defer os.Remove(msg.tempJsonPath)
+		jsonData, err := LoadJsonFile(msg.tempJsonPath)
+		if err != nil {
+			panic(err)
+		}
+		m.LoadJsonData(jsonData)
+		return m, m.Init()
 	}
 
 	var cmd tea.Cmd
@@ -54,11 +73,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+func readOnlyFileExecTeaCmd(jsonData interface{}) tea.Cmd {
+	// Save jsonFile and view in editor
+	jsonPath, err := getTempJsonPath()
+	if err != nil {
+		panic(err)
+	}
+	err = SaveJsonToFile(jsonPath, jsonData)
+	if err != nil {
+		panic(err)
+	}
+	cmd := editorFileExecCmd(jsonPath, true)
+
+	// Open editor
+	return tea.ExecProcess(cmd, func(err error) tea.Msg {
+		return editorFinishedMsg{tempJsonPath: jsonPath, err: err}
+	})
+}
+
 func (m model) UpdateJsonOutputViewByQuery(query string) model {
-	evalQuery, jsonData := RobustQueryJsonData(query, m.rawJsonData)
+	var jsonData interface{}
+	m.queryEval, jsonData = RobustQueryJsonData(query, m.rawJsonData)
 	m.setJsonDataInView(jsonData)
-	// m.jsonKeyView.SetQueryInput(evalQuery)
-	m.jsonKeyView.SetComment("Prev query: " + evalQuery)
+	m.jsonKeyView.SetComment(m.queryHist + m.queryEval)
 	return m
 }
 

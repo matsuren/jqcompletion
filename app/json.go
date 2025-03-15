@@ -38,6 +38,19 @@ func LoadJsonFile(jsonPath string) (interface{}, error) {
 	return rawJsonData, nil
 }
 
+func SaveJsonToFile(jsonPath string, jsonData interface{}) error {
+	// Convert jsonData to formatted JSON bytes
+	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshalling JSON: %w", err)
+	}
+	err = os.WriteFile(jsonPath, resultBytes, 0o644)
+	if err != nil {
+		return fmt.Errorf("error writing file: %w", err)
+	}
+	return nil
+}
+
 func FuzzyFind(query string, candidates []string) []string {
 	if len(candidates) == 0 {
 		return nil
