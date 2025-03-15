@@ -75,30 +75,6 @@ func initializeModel() model {
 	}
 }
 
-func initializeModelWithJsonFile(jsonPath string) model {
-	m := initializeModel()
-	m.LoadJsonFile(jsonPath)
-	return m
-}
-
-func (m *model) LoadJsonFile(jsonPath string) {
-	log.Println("Loading ", jsonPath)
-	// Read the JSON file
-	jsonData, err := os.ReadFile(jsonPath)
-	if err != nil {
-		panic(err)
-	}
-	// Parse the JSON
-	log.Println("Parsing ", jsonPath)
-	var rawJsonData interface{}
-	err = json.Unmarshal(jsonData, &rawJsonData)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Done LoadJsonFile")
-	m.LoadJsonData(rawJsonData)
-}
-
 func (m *model) LoadJsonData(jsonData interface{}) {
 	// Set rawJsonData
 	m.rawJsonData = jsonData

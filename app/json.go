@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -17,6 +18,24 @@ type KeySearchEngine struct {
 
 func (e KeySearchEngine) Query(query string) []string {
 	return FuzzyFind(query, e.keys)
+}
+
+func LoadJsonFile(jsonPath string) (interface{}, error) {
+	logger.Debug("Loading:", "jsonPath", jsonPath)
+	// Read the JSON file
+	jsonData, err := os.ReadFile(jsonPath)
+	if err != nil {
+		return nil, err
+	}
+	// Parse the JSON
+	logger.Debug("Parsing:", "jsonPath", jsonPath)
+	var rawJsonData interface{}
+	err = json.Unmarshal(jsonData, &rawJsonData)
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("Done LoadJsonFile")
+	return rawJsonData, nil
 }
 
 func FuzzyFind(query string, candidates []string) []string {

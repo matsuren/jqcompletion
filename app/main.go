@@ -43,7 +43,14 @@ func main() {
 			os.Exit(0)
 		}
 	}
-	m := initializeModelWithJsonFile(jsonPath)
+	m := initializeModel()
+	jsonData, err := LoadJsonFile(jsonPath)
+	if err != nil {
+		fmt.Printf("Failed to load json: %v", err)
+		os.Exit(0)
+	}
+	m.LoadJsonData(jsonData)
+
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)
