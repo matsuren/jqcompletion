@@ -4,9 +4,12 @@
 Hobby project to learn Go by creating some tools.
 
 ## TODO
+- [ ] Handle `|` and [0] in query
+- [ ] print jq query
+- [ ] open output view in vim (etc.)
+- [ ] Handle large file
 - [ ] Better to use fzf
 - [ ] Accept stdin
-- [ ] Handle `|` in query
 - [ ] Add jq keyword completion, e.g., length, select, etc.
 
 ## Installation

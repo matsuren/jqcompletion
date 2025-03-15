@@ -66,7 +66,6 @@ func TestGetUnnestedKeys(t *testing.T) {
 	want := []string{".status", ".user.age", ".user.name"}
 
 	got, err := GetUnnestedKeys(input)
-
 	// Check error cases
 	if err != nil {
 		t.Errorf("Got error: %v", err)
@@ -144,7 +143,7 @@ func TestRobustQueryJsonData(t *testing.T) {
 func TestRobustQueryJsonData2(t *testing.T) {
 	SetLogLevel(slog.LevelInfo)
 
-	filePath := "./data/sample.json"
+	filePath := "../data/sample.json"
 	jsonData, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Error reading file: %v\n", err)
