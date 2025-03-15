@@ -2,21 +2,24 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-    // Log default true now
-    // TODO: Disable this behavior
-	if true || os.Getenv("DEBUGLOG") != "" {
-		f, err := tea.LogToFile("debug.log", "main")
+	if os.Getenv("DEBUGLOG") != "" {
+		f, err := tea.LogToFile("debug.log", "queryview")
 		if err != nil {
 			fmt.Println("Couldn't open a file for logging:", err)
 			os.Exit(1)
 		}
 		defer f.Close()
+	} else {
+		log.SetOutput(io.Discard)
+		log.SetFlags(0)
 	}
 
 	var jsonPath string

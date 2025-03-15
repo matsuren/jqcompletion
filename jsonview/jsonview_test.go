@@ -3,6 +3,8 @@ package jsonview
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"testing"
 
@@ -52,6 +54,9 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 		defer f.Close()
+	} else {
+		log.SetOutput(io.Discard)
+		log.SetFlags(0)
 	}
 
 	m.Run()
