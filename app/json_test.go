@@ -51,7 +51,7 @@ func TestGetKeys(t *testing.T) {
 
 	// Use reflect.DeepEqual for comparison
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got %v, want %v", got, input)
+		t.Errorf("Got %v, want %v", got, want)
 	}
 }
 
@@ -88,7 +88,7 @@ func TestJoinPath(t *testing.T) {
 	got := JoinPath(input)
 
 	if got != want {
-		t.Errorf("Got %v, want %v", got, input)
+		t.Errorf("Got %v, want %v", got, want)
 	}
 }
 
