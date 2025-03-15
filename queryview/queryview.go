@@ -85,14 +85,16 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		log.Printf("WindowSize: %#v", msg)
-		m.styleForInput = m.styleForInput.Width(msg.Width)
+        log.Printf("queryview: WindowSize: %#v", msg)
+		// FIXME: Somehow margin is needed to avoid hidden top
+		margin := 2
+		m.styleForInput = m.styleForInput.Width(msg.Width - margin)
 		x, _ := m.styleForInput.GetFrameSize()
-		m.queryInput.Width = msg.Width - x
+		m.queryInput.Width = m.styleForInput.GetWidth() - x
 
-		h := lipgloss.Height(m.queryInputView())
-		m.styleForList = m.styleForList.Width(msg.Width).Height(msg.Height - h)
-		m.list.SetWidth(msg.Width - x)
+		height := msg.Height - lipgloss.Height(m.queryInputView()) - margin
+		m.styleForList = m.styleForList.Width(m.styleForInput.GetWidth()).Height(height)
+		m.list.SetWidth(m.styleForList.GetWidth() - x)
 		m.list.SetHeight(m.styleForList.GetHeight())
 		return m, nil
 

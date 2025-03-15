@@ -26,8 +26,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		log.Printf("Size msg in main: %#v", msg)
-		margin := 2
-		msgForChild := tea.WindowSizeMsg{Width: msg.Width/2 - margin, Height: msg.Height - margin}
+		msgForChild := tea.WindowSizeMsg{Width: msg.Width / 2, Height: msg.Height}
 		m.jsonKeyView, _ = m.jsonKeyView.Update(msgForChild)
 		m.jsonOutputView, _ = m.jsonOutputView.Update(msgForChild)
 		return m, nil

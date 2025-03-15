@@ -35,10 +35,12 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.style = m.style.Width(msg.Width).Height(msg.Height)
+		// FIXME: Somehow margin is needed to avoid hidden top
+		margin := 2
+		m.style = m.style.Width(msg.Width - margin).Height(msg.Height - margin)
 		x, _ := m.style.GetFrameSize()
-		m.viewport.Width = msg.Width - x
-		m.viewport.Height = msg.Height
+		m.viewport.Width = m.style.GetWidth() - x
+		m.viewport.Height = m.style.GetHeight()
 		log.Printf("JsonView msg: %#v", msg)
 		return m, nil
 
