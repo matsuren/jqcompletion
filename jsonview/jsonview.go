@@ -18,7 +18,6 @@ func New(width, height int) Model {
 	return Model{
 		viewport: v,
 		style: lipgloss.NewStyle().
-			PaddingRight(2).
 			Width(width).
 			Border(lipgloss.NormalBorder()),
 	}

@@ -16,14 +16,10 @@ format:
 	@echo "Formatting code with gofumpt..."
 	gofumpt -l -w .
 
-.PHONY: testjsonview
-testjsonview:
-	go test ./jsonview --tags debug -v -count=1
+.PHONY: testuijsonview
+testuijsonview:
+	DEBUGLOG=1 go run ./uitests/jsonview/uitest.go
 
-.PHONY: testqueryviewonly
-testqueryviewonly:
-	DEBUGLOG=1 go test ./queryview --tags debug -v -count=1 -run OnlyView
-
-.PHONY: testqueryviewquery
-testqueryviewquery:
-	DEBUGLOG=1 go test ./queryview --tags debug -v -count=1 -run Query
+.PHONY: testuiqueryview
+testuiqueryview:
+	DEBUGLOG=1 go run ./uitests/queryview/uitest.go

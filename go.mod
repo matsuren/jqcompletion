@@ -11,9 +11,15 @@ require (
 )
 
 require (
+	github.com/aymanbagabas/go-udiff v0.2.0 // indirect
+	github.com/charmbracelet/x/exp/golden v0.0.0-20240815200342-61de596daa2b // indirect
+)
+
+require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
+	github.com/charmbracelet/x/exp/teatest v0.0.0-20250313150240-c09addb0e197
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/itchyny/timefmt-go v0.1.6 // indirect

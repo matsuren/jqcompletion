@@ -85,7 +85,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-        log.Printf("queryview: WindowSize: %#v", msg)
+		log.Printf("queryview: WindowSize: %#v", msg)
 		// FIXME: Somehow margin is needed to avoid hidden top
 		margin := 2
 		m.styleForInput = m.styleForInput.Width(msg.Width - margin)
@@ -99,6 +99,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		log.Printf("queryview: KeyMsg: %#v", msg)
 		switch msg.Type {
 		case tea.KeyCtrlC:
 			return m, tea.Quit

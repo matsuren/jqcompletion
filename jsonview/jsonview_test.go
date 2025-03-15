@@ -1,4 +1,3 @@
-// TODO: enable go:build debug
 package jsonview
 
 import (
@@ -9,10 +8,10 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/exp/teatest"
 )
 
-const content = `
-{
+const content = `{
   "name": "example",
   "version": "1.0.0",
   "description": "A sample JSON object",
@@ -20,29 +19,7 @@ const content = `
   "properties": {
     "active": true,
     "count": 42
-  },
-  "name": "example",
-  "version": "1.0.0",
-  "description": "A sample JSON object",
-  "properties": {
-    "active": true,
-    "count": 42
-  },
-    "items": [
-    { "name": "apple", "price": 110, "count": 3 },
-    { "name": "apple", "price": 110, "count": 3 },
-    { "name": "apple", "price": 110, "count": 3 },
-    { "name": "apple", "price": 110, "count": 3 },
-    { "name": "orange", "price": 120, "count": 2 },
-    { "name": "orange2", "price": null, "count": 2 },
-    { "name": "orange", "price": 120, "count": 2 },
-    { "name": "orange2", "price": null, "count": 2 },
-    { "name": "orange", "price": 120, "count": 2 },
-    { "name": "orange2", "price": null, "count": 2 },
-    { "name": "orange", "price": 120, "count": 2 },
-    { "name": "orange2", "price": null, "count": 2 },
-    { "name": "banana", "price": 1000, "count": 4 }
-  ],
+  }
 }
 `
 
@@ -86,13 +63,19 @@ func (m model) View() string {
 	return m.component.View()
 }
 
-func TestUIJsonView(t *testing.T) {
-	model := initModel()
-	if _, err := tea.NewProgram(
-		model,
-		tea.WithAltScreen(),
-		tea.WithMouseCellMotion(),
-	).Run(); err != nil {
-		t.Error(err)
+func TestUI(t *testing.T) {
+	m := initModel()
+	tm := teatest.NewTestModel(
+		t, m,
+		teatest.WithInitialTermSize(300, 100),
+	)
+	t.Cleanup(func() {
+		if err := tm.Quit(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	if err := tm.Quit(); err != nil {
+		t.Fatal(err)
 	}
+	// TODO: Check output if it helps
 }
