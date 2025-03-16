@@ -1,13 +1,16 @@
-# [WIP] Jq completion
+# Jq completion
+![GitHub Release](https://img.shields.io/github/v/release/matsuren/jqcompletion)
 
-[WIP] Jq completion tool.
-Hobby project to learn Go by creating some tools.
+Jq key completion tui app. This is a hobby project to learn Go by creating some tools.
+
+### Demo
+![demo](.README/demo.gif)
 
 ## TODO
 - [ ] Handle `|` and [0] in query
-- [ ] print jq query
-- [ ] open output view in vim (etc.)
-- [ ] Handle large file
+- [x] print jq query
+- [x] open output view in vim (etc.)
+- [x] Handle large file -> better than tview version due to async update
 - [ ] Better to use fzf
 - [ ] Accept stdin
 - [ ] Add jq keyword completion, e.g., length, select, etc.

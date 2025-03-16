@@ -20,6 +20,16 @@ build:
 	@echo "Building exec file..."
 	goreleaser build --single-target --snapshot --clean --output ./jqcompletion
 
+# Optional command
+.PHONY: demo-gif
+demo-gif: build
+	@if ! command -v vhs >/dev/null 2>&1; then \
+		echo "Error: VHS is not installed. Please install from https://github.com/charmbracelet/vhs"; \
+		exit 1; \
+	fi
+	@echo "Generating demo GIF..."
+	vhs .README/demo.tape
+
 .PHONY: testuijsonview
 testuijsonview:
 	DEBUGLOG=1 go run ./uitests/jsonview/uitest.go
