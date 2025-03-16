@@ -1,4 +1,4 @@
-.PHONY: all setup test lint format build
+.PHONY: all setup test updategolden lint format build
 
 setup:
 	@echo "Setting up dependencies..."
@@ -7,6 +7,10 @@ setup:
 test:
 	@echo "Running tests..."
 	go test -v ./... -count=1
+
+updategolden:
+	@echo "Update golden file..."
+	go test -v ./... -count=1 -update
 
 lint:
 	@echo "Applying linter..."
