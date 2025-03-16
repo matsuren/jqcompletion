@@ -18,7 +18,7 @@ format:
 
 build:
 	@echo "Building exec file..."
-	go build -o jqcompletion ./app
+	goreleaser build --single-target --snapshot --clean --output ./jqcompletion
 
 .PHONY: testuijsonview
 testuijsonview:
