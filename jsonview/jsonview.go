@@ -1,6 +1,8 @@
 package jsonview
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -11,6 +13,7 @@ import (
 type Model struct {
 	viewport viewport.Model
 	style    lipgloss.Style
+	jsonData interface{}
 }
 
 func New(width, height int) Model {
@@ -23,8 +26,36 @@ func New(width, height int) Model {
 	}
 }
 
-func (m *Model) SetContent(content string) {
-	m.viewport.SetContent(content)
+func (m *Model) SetJsonString(jsonString string) error {
+	var jsonData interface{}
+	err := json.Unmarshal([]byte(jsonString), &jsonData)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling JSON in SetJsonString: %w", err)
+	}
+	err = m.SetJsonData(jsonData)
+	if err != nil {
+		return fmt.Errorf("error SetJsonData in SetJsonString: %w", err)
+	}
+	return nil
+}
+
+func (m *Model) SetJsonData(jsonData interface{}) error {
+	log.Println("Start json.MarshalIndent")
+	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent failed: %w", err)
+	}
+	log.Println("Start SetContent")
+	m.viewport.SetContent(string(resultBytes))
+	log.Println("Done SetJsonDataInView")
+
+	// Save jsonData for getter
+	m.jsonData = jsonData
+	return nil
+}
+
+func (m Model) GetJsonData() interface{} {
+	return m.jsonData
 }
 
 func (m Model) Init() tea.Cmd {

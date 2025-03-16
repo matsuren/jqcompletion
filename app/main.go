@@ -49,7 +49,7 @@ func main() {
 		fmt.Print(err)
 		os.Exit(0)
 	}
-	m.LoadJsonData(jsonData)
+	m.SetJsonData(jsonData)
 
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {

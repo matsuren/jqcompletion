@@ -41,7 +41,11 @@ func TestMain(m *testing.M) {
 
 func initModel() model {
 	component := New(80, 20)
-	component.SetContent(content)
+	err := component.SetJsonString(content)
+	if err != nil {
+		panic(err)
+	}
+
 	return model{component: component}
 }
 

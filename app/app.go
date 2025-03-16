@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 
@@ -46,9 +45,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case tea.KeyCtrlS:
 			// Reload based on current query
-			evalQuery, jsonData := RobustQueryJsonData(m.queryEval, m.rawJsonData)
-			m.queryHist += evalQuery + "|"
-			return m, readOnlyFileExecTeaCmd(jsonData)
+			m.queryHist += m.queryEval + "|"
+			return m, readOnlyFileExecTeaCmd(m.jsonOutputView.GetJsonData())
 		}
 	case editorFinishedMsg:
 		if msg.err != nil {
@@ -59,7 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			panic(err)
 		}
-		m.LoadJsonData(jsonData)
+		m.SetJsonData(jsonData)
 		return m, m.Init()
 	}
 
@@ -94,7 +92,10 @@ func readOnlyFileExecTeaCmd(jsonData interface{}) tea.Cmd {
 func (m model) UpdateJsonOutputViewByQuery(query string) model {
 	var jsonData interface{}
 	m.queryEval, jsonData = RobustQueryJsonData(query, m.rawJsonData)
-	m.setJsonDataInView(jsonData)
+	err := m.jsonOutputView.SetJsonData(jsonData)
+	if err != nil {
+		panic(err)
+	}
 	m.jsonKeyView.SetComment(m.queryHist + m.queryEval)
 	return m
 }
@@ -112,12 +113,9 @@ func initializeModel() model {
 	}
 }
 
-func (m *model) LoadJsonData(jsonData interface{}) {
+func (m *model) SetJsonData(jsonData interface{}) {
 	// Set rawJsonData
 	m.rawJsonData = jsonData
-
-	// Output view
-	m.setJsonDataInView(m.rawJsonData)
 
 	// Query view
 	keys, err := GetUnnestedKeys(m.rawJsonData)
@@ -130,15 +128,10 @@ func (m *model) LoadJsonData(jsonData interface{}) {
 		keys: keys,
 	}
 	m.jsonKeyView.SetEngine(engine)
-}
 
-func (m *model) setJsonDataInView(jsonData interface{}) {
-	log.Println("Start json.MarshalIndent")
-	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
+	// Output view
+	err = m.jsonOutputView.SetJsonData(m.rawJsonData)
 	if err != nil {
 		panic(err)
 	}
-	log.Println("Start SetContent")
-	m.jsonOutputView.SetContent(string(resultBytes))
-	log.Println("Done SetJsonDataInView")
 }

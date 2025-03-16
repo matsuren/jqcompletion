@@ -46,7 +46,10 @@ const content = `{
 
 func initModel() model {
 	component := jsonview.New(80, 20)
-	component.SetContent(content)
+	err := component.SetJsonString(content)
+	if err != nil {
+		panic(err)
+	}
 	return model{component: component}
 }
 
