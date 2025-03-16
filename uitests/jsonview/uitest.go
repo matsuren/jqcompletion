@@ -40,7 +40,7 @@ const content = `{
     { "name": "orange", "price": 120, "count": 2 },
     { "name": "orange2", "price": null, "count": 2 },
     { "name": "banana", "price": 1000, "count": 4 }
-  ],
+  ]
 }
 `
 
