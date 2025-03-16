@@ -1,4 +1,4 @@
-.PHONY: all setup test lint format
+.PHONY: all setup test lint format build
 
 setup:
 	@echo "Setting up dependencies..."
@@ -15,6 +15,10 @@ lint:
 format:
 	@echo "Formatting code with gofumpt..."
 	gofumpt -l -w .
+
+build:
+	@echo "Building exec file..."
+	go build -o jqcompletion ./app
 
 .PHONY: testuijsonview
 testuijsonview:
