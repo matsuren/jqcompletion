@@ -45,7 +45,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case tea.KeyCtrlS:
 			// Reload based on current query
-			m.queryHist += m.queryEval + "|"
+			if m.queryEval != "." {
+				m.queryHist += m.queryEval + "|"
+			}
 			return m, readOnlyFileExecTeaCmd(m.jsonOutputView.GetJsonData())
 		}
 	case editorFinishedMsg:

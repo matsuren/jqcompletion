@@ -52,8 +52,12 @@ func main() {
 	m.SetJsonData(jsonData)
 
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
-	if _, err := p.Run(); err != nil {
+	finalModel, err := p.Run()
+	if err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
+	}
+	if finalModel, ok := finalModel.(model); ok {
+		fmt.Printf("jq '%v%v'", finalModel.queryHist, finalModel.queryEval)
 	}
 }
