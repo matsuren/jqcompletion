@@ -85,6 +85,6 @@ func main() {
 		os.Exit(1)
 	}
 	if finalModel, ok := finalModel.(model); ok {
-		fmt.Printf("jq '%v%v'", finalModel.queryHist, finalModel.queryEval)
+		fmt.Printf("jq '%v%v'\n", finalModel.queryHist, finalModel.queryEval)
 	}
 }

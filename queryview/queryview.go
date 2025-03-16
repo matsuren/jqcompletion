@@ -47,8 +47,10 @@ func requestDebouncedQuery(query string) tea.Cmd {
 
 func performQuery(query string, engine Engine) tea.Cmd {
 	if engine == nil {
+		log.Printf("queryview: performQuery is called but engin is not set")
 		return nil
 	}
+	log.Printf("queryview: performQuery with %s", query)
 	return func() tea.Msg {
 		response := engine.Query(query)
 		return queryResponseMsg(response)
@@ -112,12 +114,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case tea.KeyTab:
 			log.Printf("Tab: %#v", msg)
-			selectedValue, ok := m.list.SelectedItem().(item)
-			if ok {
-				m.queryInput.SetValue(string(selectedValue))
-				m.queryInput.CursorEnd()
-			}
-			return m, nil
+			selectedValue := m.list.SelectedItem().(item)
+			m.queryInput.SetValue(string(selectedValue))
+			m.queryInput.CursorEnd()
+			log.Printf("queryview: KeyTab")
+			return m, performQuery(m.queryInput.Value(), m.engine)
 		}
 	case queryRequestMsg:
 		if m.queryInput.Value() == string(msg) {
@@ -155,12 +156,24 @@ func (m Model) View() string {
 }
 
 func (m *Model) SetItems(items []string) {
+	log.Println("Set items")
 	listItems := make([]list.Item, 0, len(items))
 	for _, listitem := range items {
+		log.Printf("listitem: %v", listitem)
 		listItems = append(listItems, item(listitem))
 	}
 	m.list.SetItems(listItems)
 	m.list.ResetSelected()
+}
+
+func (m *Model) GetItems() []string {
+	items := m.list.Items()
+	listItems := make([]string, 0, len(items))
+	for _, listitem := range items {
+		listitem := listitem.(item)
+		listItems = append(listItems, string(listitem))
+	}
+	return listItems
 }
 
 func (m Model) SelectedValue() string {
