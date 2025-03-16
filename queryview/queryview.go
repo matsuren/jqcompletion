@@ -47,8 +47,10 @@ func requestDebouncedQuery(query string) tea.Cmd {
 
 func performQuery(query string, engine Engine) tea.Cmd {
 	if engine == nil {
+		log.Printf("queryview: performQuery is called but engin is not set")
 		return nil
 	}
+	log.Printf("queryview: performQuery with %s", query)
 	return func() tea.Msg {
 		response := engine.Query(query)
 		return queryResponseMsg(response)
@@ -154,8 +156,10 @@ func (m Model) View() string {
 }
 
 func (m *Model) SetItems(items []string) {
+	log.Println("Set items")
 	listItems := make([]list.Item, 0, len(items))
 	for _, listitem := range items {
+		log.Printf("listitem: %v", listitem)
 		listItems = append(listItems, item(listitem))
 	}
 	m.list.SetItems(listItems)
