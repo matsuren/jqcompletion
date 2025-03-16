@@ -166,6 +166,16 @@ func (m *Model) SetItems(items []string) {
 	m.list.ResetSelected()
 }
 
+func (m *Model) GetItems() []string {
+	items := m.list.Items()
+	listItems := make([]string, 0, len(items))
+	for _, listitem := range items {
+		listitem := listitem.(item)
+		listItems = append(listItems, string(listitem))
+	}
+	return listItems
+}
+
 func (m Model) SelectedValue() string {
 	selectedValue, ok := m.list.SelectedItem().(item)
 	if ok {
