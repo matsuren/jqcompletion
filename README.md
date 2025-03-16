@@ -3,6 +3,9 @@
 [WIP] Jq completion tool.
 Hobby project to learn Go by creating some tools.
 
+### Demo
+![demo](.README/demo.gif)
+
 ## TODO
 - [ ] Handle `|` and [0] in query
 - [ ] print jq query
