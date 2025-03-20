@@ -1,5 +1,7 @@
 .PHONY: all setup test lint format build
 
+all: setup test lint format build
+
 setup:
 	@echo "Setting up dependencies..."
 	go mod tidy
