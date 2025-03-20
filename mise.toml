@@ -1,0 +1,6 @@
+[tools]
+go = "1.22.5"
+goreleaser = "latest"
+golangci-lint = "latest"
+gofumpt = "latest"
+vhs = "latest"
