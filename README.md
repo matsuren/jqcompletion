@@ -54,3 +54,9 @@ I got inspirations from the followings:
 
 - `echo "" | fzf --print-query --preview 'jq {q} sample.json'`
 - https://github.com/ynqa/jnv
+
+## Development
+Install mise and run the following to setup the environment
+```
+mise install
+```

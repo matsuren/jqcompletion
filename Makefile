@@ -1,5 +1,7 @@
 .PHONY: all setup test lint format build
 
+all: setup test lint format build
+
 setup:
 	@echo "Setting up dependencies..."
 	go mod tidy
@@ -21,6 +23,18 @@ build:
 	goreleaser build --single-target --snapshot --clean --output ./jqcompletion
 
 # Optional command
+.PHONY: coverage
+coverage:
+	go test $$(go list ./... | grep -v uitests) -coverprofile=coverage.txt
+
+.PHONY: coverage-html
+coverage-html: coverage
+	go tool cover -html=coverage.txt
+
+.PHONY: coverage-func
+coverage-func: coverage
+	go tool cover -func=coverage.txt
+
 .PHONY: demo-gif
 demo-gif: build
 	@if ! command -v vhs >/dev/null 2>&1; then \

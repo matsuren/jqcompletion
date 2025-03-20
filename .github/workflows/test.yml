@@ -24,12 +24,27 @@ jobs:
       run: go version
 
     - name: Install dependencies
-      run: go mod download
+      run: make setup
+
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+        golangci-lint --version
+
+    - name: Install gofumpt
+      run: go install mvdan.cc/gofumpt@latest
 
     - name: Run tests
-      run: go test -v ./...
+      run: make test
 
     - name: Run linter
-      uses: golangci/golangci-lint-action@v6
+      run: make lint
+
+    - name: Generate coverage report
+      run: make coverage
+
+    - name: Upload results to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        version: latest
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: matsuren/jqcompletion
