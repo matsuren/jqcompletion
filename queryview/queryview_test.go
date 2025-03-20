@@ -157,8 +157,8 @@ func TestUIDebounceQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 	finalModel := tm.FinalModel(t, teatest.WithFinalTimeout(time.Second)).(model)
-	list := finalModel.component.list
-	if len(list.Items()) < 10 {
-		t.Errorf("list is not updated: %#v", list.Items())
+	items := finalModel.component.GetItems()
+	if len(items) < 10 {
+		t.Errorf("list is not updated: %#v", items)
 	}
 }
