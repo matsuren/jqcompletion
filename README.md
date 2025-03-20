@@ -1,5 +1,6 @@
 # Jq completion
 ![GitHub Release](https://img.shields.io/github/v/release/matsuren/jqcompletion)
+![Codecov](https://img.shields.io/codecov/c/github/matsuren/jqcompletion)
 
 Jq key completion tui app. This is a hobby project to learn Go by creating some tools.
 
