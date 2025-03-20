@@ -79,3 +79,39 @@ func TestAppUISampleData(t *testing.T) {
 		t.Errorf("Got %v, want %v", got, want)
 	}
 }
+
+func TestAppUISampleDataTypeEnter(t *testing.T) {
+	m := initializeModel()
+	jsonData, err := LoadJsonFile("../data/sample.json")
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(0)
+	}
+	m.SetJsonData(jsonData)
+	tm := teatest.NewTestModel(
+		t, m,
+		teatest.WithInitialTermSize(100, 40),
+	)
+	time.Sleep(time.Millisecond * 100) // Wait for model initialization
+	tm.Type(".results[0]|keys")
+	time.Sleep(time.Millisecond * 400)
+	tm.Send(tea.KeyMsg{
+		Type: tea.KeyEnter,
+	})
+
+	// Quit app and check output
+	if err := tm.Quit(); err != nil {
+		t.Fatal(err)
+	}
+	finalModel := tm.FinalModel(t, teatest.WithFinalTimeout(time.Second)).(model)
+
+	// Check json output view
+	want := `[
+  "level",
+  "message"
+]`
+	got := jsonDataToStrings(finalModel.jsonOutputView.GetJsonData())
+	if got != want {
+		t.Errorf("Got %v, want %v", got, want)
+	}
+}
