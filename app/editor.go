@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -61,5 +62,36 @@ func copyFile(src, dst string) error {
 		return fmt.Errorf("Error copy files: %w", err)
 	}
 
+	return nil
+}
+
+func LoadJsonFile(jsonPath string) (interface{}, error) {
+	logger.Debug("Loading:", "jsonPath", jsonPath)
+	// Read the JSON file
+	jsonData, err := os.ReadFile(jsonPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+	// Parse the JSON
+	logger.Debug("Parsing:", "jsonPath", jsonPath)
+	var rawJsonData interface{}
+	err = json.Unmarshal(jsonData, &rawJsonData)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling JSON: %w", err)
+	}
+	logger.Debug("Done LoadJsonFile")
+	return rawJsonData, nil
+}
+
+func SaveJsonToFile(jsonPath string, jsonData interface{}) error {
+	// Convert jsonData to formatted JSON bytes
+	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshalling JSON: %w", err)
+	}
+	err = os.WriteFile(jsonPath, resultBytes, 0o644)
+	if err != nil {
+		return fmt.Errorf("error writing file: %w", err)
+	}
 	return nil
 }
