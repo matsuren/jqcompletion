@@ -30,3 +30,6 @@ dist/
 debug.log
 
 jqcompletion
+
+# coverage
+coverage.txt
