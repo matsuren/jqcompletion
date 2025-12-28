@@ -142,6 +142,7 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 	}
 	iter := code.Run(jsonData)
 	var results []interface{}
+	nonNilCount := 0
 	for {
 		v, ok := iter.Next()
 		if !ok {
@@ -150,15 +151,19 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 		if err, ok := v.(error); ok {
 			return "", err
 		}
-		if v == nil {
-			return "", fmt.Errorf("empty results")
+		if v != nil {
+			nonNilCount++
 		}
 		results = append(results, v)
 	}
-	if len(results) >= 2 {
-		return results, nil
+
+	if len(results) == 0 || nonNilCount == 0 {
+		return "", fmt.Errorf("empty results")
 	}
-	return results[0], nil
+	if len(results) == 1 {
+		return results[0], nil
+	}
+	return results, nil
 }
 
 func RobustQueryJsonData(queryStr string, jsonData interface{}) (string, interface{}) {
