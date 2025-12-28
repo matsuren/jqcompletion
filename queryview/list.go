@@ -39,7 +39,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 		}
 		style = style.PaddingLeft(newPaddingLeft).Foreground(mainColor)
 	}
-	fmt.Fprint(w, style.Render(str))
+	_, _ = fmt.Fprint(w, style.Render(str))
 }
 
 func newList(width, height int) list.Model {
