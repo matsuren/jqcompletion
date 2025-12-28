@@ -186,6 +186,47 @@ func TestRobustQueryJsonData2(t *testing.T) {
 	}
 }
 
+func TestRobustQueryJsonData3(t *testing.T) {
+	SetLogLevel(slog.LevelInfo)
+
+	filePath := "../data/sample.json"
+	jsonData, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Printf("Error reading file: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Parse the JSON
+	var data interface{}
+	err = json.Unmarshal(jsonData, &data)
+	if err != nil {
+		fmt.Printf("Error parsing JSON: %v\n", err)
+		os.Exit(1)
+	}
+
+	inputQuery := ".details[].size"
+
+	want := struct {
+		result interface{}
+		query  string
+	}{
+		result: []interface{}{
+			"big",
+			"small",
+			nil,
+		},
+		query: ".details[].size",
+	}
+
+	gotQuery, got := RobustQueryJsonData(inputQuery, data)
+	if !reflect.DeepEqual(gotQuery, want.query) {
+		t.Errorf("Got %v, want %v", gotQuery, want.query)
+	}
+	if !reflect.DeepEqual(jsonDataToStrings(got), jsonDataToStrings(want.result)) {
+		t.Errorf("Got %v, want %v", got, want.result)
+	}
+}
+
 func jsonDataToStrings(jsonData interface{}) string {
 	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {

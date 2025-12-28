@@ -10,5 +10,10 @@
       "level": "Debug",
       "message": "Debug message"
     }
+  ],
+  "details": [
+    { "color": "red", "size": "big" },
+    { "color": "green", "size": "small" },
+    { "color": "blue" }
   ]
 }
