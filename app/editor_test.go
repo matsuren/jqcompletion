@@ -10,14 +10,14 @@ func TestEditFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
-	defer os.Remove(jsonPath)
+	defer func() { _ = os.Remove(jsonPath) }()
 	editFileExecCmd(jsonPath)
 	// cmd.Run() will block
 }
 
 func TestEditorCopyFile(t *testing.T) {
 	jsonPath, err := getTempJsonPath()
-	defer os.Remove(jsonPath)
+	defer func() { _ = os.Remove(jsonPath) }()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func TestEditorCopyFile(t *testing.T) {
 
 func TestEditorSaveJsonToFile(t *testing.T) {
 	jsonPath, err := getTempJsonPath()
-	defer os.Remove(jsonPath)
+	defer func() { _ = os.Remove(jsonPath) }()
 	if err != nil {
 		t.Fatal(err)
 	}

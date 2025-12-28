@@ -54,7 +54,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.err != nil {
 			panic(msg.err)
 		}
-		defer os.Remove(msg.tempJsonPath)
+		defer func() { _ = os.Remove(msg.tempJsonPath) }()
 		jsonData, err := LoadJsonFile(msg.tempJsonPath)
 		if err != nil {
 			panic(err)

@@ -23,7 +23,7 @@ func main() {
 			fmt.Println("Couldn't open a file for logging:", err)
 			os.Exit(1)
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 	} else {
 		log.SetOutput(io.Discard)
 		log.SetFlags(0)
@@ -53,7 +53,7 @@ func main() {
 		fmt.Print(err)
 		os.Exit(0)
 	}
-	defer os.Remove(jsonPath)
+	defer func() { _ = os.Remove(jsonPath) }()
 	if len(args) == 1 {
 		err := copyFile(args[0], jsonPath)
 		if err != nil {

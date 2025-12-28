@@ -36,7 +36,7 @@ func editorFileExecCmd(filepath string, readOnly bool) *exec.Cmd {
 
 func getTempJsonPath() (string, error) {
 	f, err := os.CreateTemp("", fmt.Sprintf("tmp_jqc%s_*.json", time.Now().Format("2006-01-02T15:04:05")))
-	f.Close() // Just get path
+	defer func() { _ = f.Close() }()
 	return f.Name(), err
 }
 
@@ -46,7 +46,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("open source file: %w", err)
 	}
-	defer sourceFile.Close()
+	defer func() { _ = sourceFile.Close() }()
 
 	// Create or truncate the destination file
 	// The os.O_TRUNC flag ensures any existing file is truncated (overwritten)
@@ -54,7 +54,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("open dest file: %w", err)
 	}
-	defer destFile.Close()
+	defer func() { _ = destFile.Close() }()
 
 	// Copy the contents
 	_, err = io.Copy(destFile, sourceFile)

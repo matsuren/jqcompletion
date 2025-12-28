@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 			fmt.Println("Couldn't open a file for logging:", err)
 			os.Exit(1)
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 	} else {
 		log.SetOutput(io.Discard)
 		log.SetFlags(0)

@@ -201,13 +201,13 @@ func TestLoadJsonFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
 		}
-		defer os.Remove(tmpFile.Name())
+		defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 		jsonContent := `{"key": "value"}`
 		if _, err := tmpFile.Write([]byte(jsonContent)); err != nil {
 			t.Fatalf("Failed to write to temp file: %v", err)
 		}
-		tmpFile.Close()
+		defer func() { _ = tmpFile.Close() }()
 
 		// Call the function
 		result, err := LoadJsonFile(tmpFile.Name())
@@ -231,12 +231,12 @@ func TestLoadJsonFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
 		}
-		defer os.Remove(tmpFile.Name())
+		defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 		if _, err := tmpFile.Write([]byte("invalid json")); err != nil {
 			t.Fatalf("Failed to write to temp file: %v", err)
 		}
-		tmpFile.Close()
+		defer func() { _ = tmpFile.Close() }()
 
 		_, err = LoadJsonFile(tmpFile.Name())
 		if err == nil {
