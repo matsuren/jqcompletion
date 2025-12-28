@@ -103,13 +103,13 @@ func GetUnnestedKeys(jsonData interface{}) ([]string, error) {
 			break
 		}
 		if err, ok := data.(error); ok {
-			return nil, fmt.Errorf("Got error: %v", err)
+			return nil, fmt.Errorf("got error: %v", err)
 		}
 		switch v := data.(type) {
 		case []interface{}:
 			joinedPaths = append(joinedPaths, JoinPath(v))
 		default:
-			return nil, fmt.Errorf("Wrong data type: %T", v)
+			return nil, fmt.Errorf("wrong data type: %T", v)
 		}
 	}
 
@@ -151,7 +151,7 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 			return "", err
 		}
 		if v == nil {
-			return "", fmt.Errorf("Empty results")
+			return "", fmt.Errorf("empty results")
 		}
 		results = append(results, v)
 	}

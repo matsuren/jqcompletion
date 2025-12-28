@@ -44,7 +44,7 @@ func copyFile(src, dst string) error {
 	// Open the source file
 	sourceFile, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("Error open source file: %w", err)
+		return fmt.Errorf("open source file: %w", err)
 	}
 	defer sourceFile.Close()
 
@@ -52,14 +52,14 @@ func copyFile(src, dst string) error {
 	// The os.O_TRUNC flag ensures any existing file is truncated (overwritten)
 	destFile, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o666)
 	if err != nil {
-		return fmt.Errorf("Error open dest file: %w", err)
+		return fmt.Errorf("open dest file: %w", err)
 	}
 	defer destFile.Close()
 
 	// Copy the contents
 	_, err = io.Copy(destFile, sourceFile)
 	if err != nil {
-		return fmt.Errorf("Error copy files: %w", err)
+		return fmt.Errorf("copy files: %w", err)
 	}
 
 	return nil
