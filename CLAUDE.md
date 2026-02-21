@@ -33,15 +33,6 @@ Enable debug logging by setting `DEBUGLOG=1`; logs are written to `debug.log`.
 
 This is a [Bubbletea](https://github.com/charmbracelet/bubbletea) TUI app (Elm architecture) with a split-pane layout:
 
-```
-┌─────────────────┬─────────────────┐
-│   queryview     │    jsonview     │
-│  (left panel)   │  (right panel)  │
-│  text input +   │  scrollable     │
-│  fuzzy list     │  JSON output    │
-└─────────────────┴─────────────────┘
-```
-
 ### Packages
 
 - **`app/` (package `main`)** — Top-level bubbletea model and entry point
@@ -65,3 +56,31 @@ This is a [Bubbletea](https://github.com/charmbracelet/bubbletea) TUI app (Elm a
 2. User navigates list → `SelectionChangedMsg` → `app` calls `RobustQueryJsonData` → `jsonview` displays result.
 3. User presses Enter → uses raw text input value as jq query.
 4. User presses Ctrl+S → appends current query to history, saves filtered JSON to temp file, opens in `$EDITOR` (read-only for vim/nvim).
+
+## Git
+
+### Git Workflow
+
+- **Never commit directly to main or master**
+- For new features: create a branch `feature/<feature-name>` before any code changes
+- For bug fixes: create a branch `fix/<bug-name>`
+
+### Committing
+
+- **ONLY commit files YOU changed in THIS session**
+- Write clear, conventional commit messages (e.g., `feat: add dark mode toggle`)
+- Make small, atomic commits — one logical change per commit
+- Run tests before every commit
+- NEVER use `git add -A` or `git add .` - these sweep up changes from others
+- ALWAYS use `git add <specific-file-paths>` listing only files you modified
+- Before committing, run `git status` and verify you are only staging YOUR files
+- Track which files you created/modified/deleted during the session
+
+## Core Principles
+
+- **Plan First**: Write plan and create task lists with checkable items
+- **Verify Plan**: Check in before starting implementation
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+- **Test coverage**: Add test to cover if you add new features
