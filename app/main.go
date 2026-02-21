@@ -56,7 +56,7 @@ func main() {
 	jsonPath, err := getTempJsonPath()
 	if err != nil {
 		fmt.Print(err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	defer func() { _ = os.Remove(jsonPath) }()
 	if stdinIsPipe && len(args) == 1 {
@@ -71,14 +71,14 @@ func main() {
 		err := copyFile(args[0], jsonPath)
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 	} else if len(args) == 0 {
 		cmd := editFileExecCmd(jsonPath)
 		err := cmd.Run()
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 	} else {
 		panic("Wrong arguments")
@@ -90,7 +90,7 @@ func main() {
 	}
 	if err != nil {
 		fmt.Print(err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	m.SetJsonData(jsonData)
 
