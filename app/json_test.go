@@ -242,10 +242,10 @@ func TestAddTryOperators(t *testing.T) {
 		input string
 		want  string
 	}{
-		{".[].name", ".[].name"},             // all objects have name, no ? needed
+		{".[].name", ".[].name"},              // all objects have name, no ? needed
 		{".[].items[].id", ".[].items[]?.id"}, // items missing in Bob, ? after items[]
-		{".[].items[]", ".[].items[]?"},        // same for shorter path
-		{".[]", ".[]"},                         // top-level array, no error
+		{".[].items[]", ".[].items[]?"},       // same for shorter path
+		{".[]", ".[]"},                        // top-level array, no error
 	}
 	for _, tt := range tests {
 		got := addTryOperators(tt.input, data)
