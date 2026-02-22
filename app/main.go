@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -47,6 +48,10 @@ func main() {
 		os.Exit(0)
 	}
 
+	// Detect piped stdin
+	stat, _ := os.Stdin.Stat()
+	stdinIsPipe := (stat.Mode() & os.ModeCharDevice) == 0
+
 	// Main
 	jsonPath, err := getTempJsonPath()
 	if err != nil {
@@ -54,7 +59,15 @@ func main() {
 		os.Exit(0)
 	}
 	defer func() { _ = os.Remove(jsonPath) }()
-	if len(args) == 1 {
+	if stdinIsPipe && len(args) == 1 {
+		fmt.Fprintln(os.Stderr, "Error: ambiguous input — both stdin pipe and filename provided")
+		os.Exit(1)
+	} else if stdinIsPipe && len(args) == 0 {
+		if err := readStdinToFile(os.Stdin, jsonPath); err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
+			os.Exit(1)
+		}
+	} else if len(args) == 1 {
 		err := copyFile(args[0], jsonPath)
 		if err != nil {
 			fmt.Print(err)
@@ -72,13 +85,27 @@ func main() {
 	}
 	m := initializeModel()
 	jsonData, err := LoadJsonFile(jsonPath)
+	if errors.Is(err, errEmptyInput) {
+		return
+	}
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(0)
 	}
 	m.SetJsonData(jsonData)
 
-	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
+	// When stdin was piped, reopen /dev/tty for terminal input
+	opts := []tea.ProgramOption{tea.WithAltScreen(), tea.WithMouseCellMotion()}
+	if stdinIsPipe {
+		ttyFile, err := os.Open("/dev/tty")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error: could not open /dev/tty for terminal input")
+			os.Exit(1)
+		}
+		defer func() { _ = ttyFile.Close() }()
+		opts = append(opts, tea.WithInput(ttyFile))
+	}
+	p := tea.NewProgram(m, opts...)
 	finalModel, err := p.Run()
 	if err != nil {
 		fmt.Println("Error running program:", err)
@@ -87,4 +114,15 @@ func main() {
 	if finalModel, ok := finalModel.(model); ok {
 		fmt.Printf("jq '%v%v'\n", finalModel.queryHist, finalModel.queryEval)
 	}
+}
+
+func readStdinToFile(r io.Reader, dstPath string) error {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("reading stdin: %w", err)
+	}
+	if err := os.WriteFile(dstPath, data, 0o600); err != nil {
+		return fmt.Errorf("writing temp file: %w", err)
+	}
+	return nil
 }
