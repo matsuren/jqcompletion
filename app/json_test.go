@@ -227,6 +227,30 @@ func TestRobustQueryJsonData3(t *testing.T) {
 	}
 }
 
+func TestQueryJsonData_HeterogeneousArray(t *testing.T) {
+	// Simulates slurped JSONL where some objects lack a key with nested arrays
+	data := []interface{}{
+		map[string]interface{}{
+			"name":  "Alice",
+			"items": []interface{}{map[string]interface{}{"id": float64(1)}, map[string]interface{}{"id": float64(2)}},
+		},
+		map[string]interface{}{
+			"name": "Bob",
+		},
+	}
+
+	// .[].items[].id — should return results from Alice and null for Bob
+	result, err := QueryJsonData(".[].items[].id", data)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	got := jsonDataToStrings(result)
+	want := jsonDataToStrings([]interface{}{float64(1), float64(2), nil})
+	if got != want {
+		t.Errorf("Got %v, want %v", got, want)
+	}
+}
+
 func jsonDataToStrings(jsonData interface{}) string {
 	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {

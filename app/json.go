@@ -143,13 +143,17 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 	iter := code.Run(jsonData)
 	var results []interface{}
 	nonNilCount := 0
+	hasError := false
 	for {
 		v, ok := iter.Next()
 		if !ok {
 			break
 		}
-		if err, ok := v.(error); ok {
-			return "", err
+		if _, ok := v.(error); ok {
+			// Replace iteration errors with null (e.g., when a JSONL line lacks a key)
+			hasError = true
+			results = append(results, nil)
+			continue
 		}
 		if v != nil {
 			nonNilCount++
@@ -157,8 +161,11 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 		results = append(results, v)
 	}
 
-	if len(results) == 0 || nonNilCount == 0 {
+	if len(results) == 0 || (nonNilCount == 0 && !hasError) {
 		return "", fmt.Errorf("empty results")
+	}
+	if nonNilCount == 0 && hasError {
+		return "", fmt.Errorf("query produced only errors")
 	}
 	if len(results) == 1 {
 		return results[0], nil
