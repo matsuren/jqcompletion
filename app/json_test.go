@@ -251,7 +251,7 @@ func TestLoadJsonFile(t *testing.T) {
 		defer func() { _ = tmpFile.Close() }()
 
 		// Call the function
-		result, err := LoadJsonFile(tmpFile.Name())
+		result, _, err := LoadJsonFile(tmpFile.Name())
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -279,14 +279,14 @@ func TestLoadJsonFile(t *testing.T) {
 		}
 		defer func() { _ = tmpFile.Close() }()
 
-		_, err = LoadJsonFile(tmpFile.Name())
+		_, _, err = LoadJsonFile(tmpFile.Name())
 		if err == nil {
 			t.Errorf("Expected an error for invalid JSON but got none")
 		}
 	})
 
 	t.Run("Non-Existent File", func(t *testing.T) {
-		_, err := LoadJsonFile("non_existent_file.json")
+		_, _, err := LoadJsonFile("non_existent_file.json")
 		if err == nil {
 			t.Errorf("Expected an error for non-existent file but got none")
 		}

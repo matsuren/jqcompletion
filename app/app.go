@@ -16,6 +16,7 @@ type model struct {
 	rawJsonData    interface{}
 	queryEval      string
 	queryHist      string
+	isSlurp        bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -55,7 +56,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			panic(msg.err)
 		}
 		defer func() { _ = os.Remove(msg.tempJsonPath) }()
-		jsonData, err := LoadJsonFile(msg.tempJsonPath)
+		jsonData, _, err := LoadJsonFile(msg.tempJsonPath)
 		if err != nil {
 			panic(err)
 		}

@@ -84,7 +84,7 @@ func main() {
 		panic("Wrong arguments")
 	}
 	m := initializeModel()
-	jsonData, err := LoadJsonFile(jsonPath)
+	jsonData, isSlurp, err := LoadJsonFile(jsonPath)
 	if errors.Is(err, errEmptyInput) {
 		return
 	}
@@ -92,6 +92,7 @@ func main() {
 		fmt.Print(err)
 		os.Exit(1)
 	}
+	m.isSlurp = isSlurp
 	m.SetJsonData(jsonData)
 
 	// When stdin was piped, reopen /dev/tty for terminal input
@@ -112,7 +113,11 @@ func main() {
 		os.Exit(1)
 	}
 	if finalModel, ok := finalModel.(model); ok {
-		fmt.Printf("jq '%v%v'\n", finalModel.queryHist, finalModel.queryEval)
+		if finalModel.isSlurp {
+			fmt.Printf("jq -s '%v%v'\n", finalModel.queryHist, finalModel.queryEval)
+		} else {
+			fmt.Printf("jq '%v%v'\n", finalModel.queryHist, finalModel.queryEval)
+		}
 	}
 }
 
