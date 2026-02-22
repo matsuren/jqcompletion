@@ -227,6 +227,34 @@ func TestRobustQueryJsonData3(t *testing.T) {
 	}
 }
 
+func TestAddTryOperators(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{
+			"name":  "Alice",
+			"items": []interface{}{map[string]interface{}{"id": float64(1)}},
+		},
+		map[string]interface{}{
+			"name": "Bob",
+		},
+	}
+
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{".[].name", ".[].name"},             // all objects have name, no ? needed
+		{".[].items[].id", ".[].items[]?.id"}, // items missing in Bob, ? after items[]
+		{".[].items[]", ".[].items[]?"},        // same for shorter path
+		{".[]", ".[]"},                         // top-level array, no error
+	}
+	for _, tt := range tests {
+		got := addTryOperators(tt.input, data)
+		if got != tt.want {
+			t.Errorf("addTryOperators(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
 func TestQueryJsonData_HeterogeneousArray(t *testing.T) {
 	// Simulates slurped JSONL where some objects lack a key with nested arrays
 	data := []interface{}{
