@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,8 @@ import (
 	"os/exec"
 	"time"
 )
+
+var errEmptyInput = fmt.Errorf("empty input")
 
 type editorFinishedMsg struct {
 	tempJsonPath string
@@ -71,6 +74,9 @@ func LoadJsonFile(jsonPath string) (interface{}, error) {
 	jsonData, err := os.ReadFile(jsonPath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+	if len(bytes.TrimSpace(jsonData)) == 0 {
+		return nil, errEmptyInput
 	}
 	// Parse the JSON
 	logger.Debug("Parsing:", "jsonPath", jsonPath)
