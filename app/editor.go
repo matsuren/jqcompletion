@@ -39,8 +39,11 @@ func editorFileExecCmd(filepath string, readOnly bool) *exec.Cmd {
 
 func getTempJsonPath() (string, error) {
 	f, err := os.CreateTemp("", fmt.Sprintf("tmp_jqc%s_*.json", time.Now().Format("2006-01-02T15:04:05")))
+	if err != nil {
+		return "", err
+	}
 	defer func() { _ = f.Close() }()
-	return f.Name(), err
+	return f.Name(), nil
 }
 
 func copyFile(src, dst string) error {

@@ -114,8 +114,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case tea.KeyTab:
 			log.Printf("Tab: %#v", msg)
-			selectedValue := m.list.SelectedItem().(item)
-			m.queryInput.SetValue(string(selectedValue))
+			selectedItem, ok := m.list.SelectedItem().(item)
+			if !ok {
+				return m, nil
+			}
+			m.queryInput.SetValue(string(selectedItem))
 			m.queryInput.CursorEnd()
 			log.Printf("queryview: KeyTab")
 			return m, performQuery(m.queryInput.Value(), m.engine)
