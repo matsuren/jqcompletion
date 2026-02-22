@@ -101,7 +101,7 @@ func LoadJsonFile(jsonPath string) (interface{}, bool, error) {
 		}
 		var item interface{}
 		if err := json.Unmarshal(trimmed, &item); err != nil {
-			return nil, false, fmt.Errorf("error unmarshalling JSON: %w", origErr)
+			return nil, false, fmt.Errorf("error parsing JSONL line: %w", err)
 		}
 		items = append(items, item)
 	}
