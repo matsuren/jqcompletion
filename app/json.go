@@ -131,6 +131,51 @@ func JoinPath(v []interface{}) string {
 	return joinedPath
 }
 
+// addTryOperators adds ? after each [] in key that produces an iteration error on jsonData.
+// For example, .[].orders[].id becomes .[].orders[]?.id if .orders is missing in some elements.
+func addTryOperators(key string, jsonData interface{}) string {
+	var result strings.Builder
+	i := 0
+	for i < len(key) {
+		if i+1 < len(key) && key[i] == '[' && key[i+1] == ']' {
+			result.WriteString("[]")
+			// Check if the prefix up to this [] produces an iteration error
+			if hasIterationError(key[:i+2], jsonData) {
+				result.WriteByte('?')
+			}
+			i += 2
+		} else {
+			result.WriteByte(key[i])
+			i++
+		}
+	}
+	return result.String()
+}
+
+// hasIterationError checks if running queryStr on jsonData produces any iteration error
+// (e.g., "null has no elements" when a key is missing in some array elements).
+func hasIterationError(queryStr string, jsonData interface{}) bool {
+	query, err := gojq.Parse(queryStr)
+	if err != nil {
+		return false
+	}
+	code, err := gojq.Compile(query)
+	if err != nil {
+		return false
+	}
+	iter := code.Run(jsonData)
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if _, ok := v.(error); ok {
+			return true
+		}
+	}
+	return false
+}
+
 func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 	query, err := gojq.Parse(queryStr)
 	if err != nil {
@@ -143,13 +188,17 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 	iter := code.Run(jsonData)
 	var results []interface{}
 	nonNilCount := 0
+	hasError := false
 	for {
 		v, ok := iter.Next()
 		if !ok {
 			break
 		}
-		if err, ok := v.(error); ok {
-			return "", err
+		if _, ok := v.(error); ok {
+			// Replace iteration errors with null (e.g., when a JSONL line lacks a key)
+			hasError = true
+			results = append(results, nil)
+			continue
 		}
 		if v != nil {
 			nonNilCount++
@@ -157,8 +206,11 @@ func QueryJsonData(queryStr string, jsonData interface{}) (interface{}, error) {
 		results = append(results, v)
 	}
 
-	if len(results) == 0 || nonNilCount == 0 {
+	if len(results) == 0 || (nonNilCount == 0 && !hasError) {
 		return "", fmt.Errorf("empty results")
+	}
+	if nonNilCount == 0 && hasError {
+		return "", fmt.Errorf("query produced only errors")
 	}
 	if len(results) == 1 {
 		return results[0], nil

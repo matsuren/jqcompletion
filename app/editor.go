@@ -71,25 +71,45 @@ func copyFile(src, dst string) error {
 	return nil
 }
 
-func LoadJsonFile(jsonPath string) (interface{}, error) {
+func LoadJsonFile(jsonPath string) (interface{}, bool, error) {
 	logger.Debug("Loading:", "jsonPath", jsonPath)
 	// Read the JSON file
 	jsonData, err := os.ReadFile(jsonPath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading file: %w", err)
+		return nil, false, fmt.Errorf("error reading file: %w", err)
 	}
 	if len(bytes.TrimSpace(jsonData)) == 0 {
-		return nil, errEmptyInput
+		return nil, false, errEmptyInput
 	}
 	// Parse the JSON
 	logger.Debug("Parsing:", "jsonPath", jsonPath)
 	var rawJsonData interface{}
 	err = json.Unmarshal(jsonData, &rawJsonData)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling JSON: %w", err)
+	if err == nil {
+		logger.Debug("Done LoadJsonFile")
+		return rawJsonData, false, nil
 	}
-	logger.Debug("Done LoadJsonFile")
-	return rawJsonData, nil
+
+	// Try parsing as JSONL (one JSON value per line)
+	origErr := err
+	lines := bytes.Split(jsonData, []byte("\n"))
+	var items []interface{}
+	for _, line := range lines {
+		trimmed := bytes.TrimSpace(line)
+		if len(trimmed) == 0 {
+			continue
+		}
+		var item interface{}
+		if err := json.Unmarshal(trimmed, &item); err != nil {
+			return nil, false, fmt.Errorf("error parsing JSONL line: %w", err)
+		}
+		items = append(items, item)
+	}
+	if len(items) < 2 {
+		return nil, false, fmt.Errorf("error unmarshalling JSON: %w", origErr)
+	}
+	logger.Debug("Done LoadJsonFile (JSONL slurp mode)")
+	return interface{}(items), true, nil
 }
 
 func SaveJsonToFile(jsonPath string, jsonData interface{}) error {

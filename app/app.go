@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -16,6 +17,7 @@ type model struct {
 	rawJsonData    interface{}
 	queryEval      string
 	queryHist      string
+	isSlurp        bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -55,7 +57,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			panic(msg.err)
 		}
 		defer func() { _ = os.Remove(msg.tempJsonPath) }()
-		jsonData, err := LoadJsonFile(msg.tempJsonPath)
+		jsonData, _, err := LoadJsonFile(msg.tempJsonPath)
 		if err != nil {
 			panic(err)
 		}
@@ -123,6 +125,12 @@ func (m *model) SetJsonData(jsonData interface{}) {
 	keys, err := GetUnnestedKeys(m.rawJsonData)
 	if err != nil {
 		panic(err)
+	}
+	// Add ? after specific [] that produce iteration errors (e.g., missing keys in some array elements)
+	for i, key := range keys {
+		if strings.Contains(key, "[]") {
+			keys[i] = addTryOperators(key, m.rawJsonData)
+		}
 	}
 	// Add `.` to query everything
 	keys = append([]string{"."}, keys...)

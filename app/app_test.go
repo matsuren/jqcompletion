@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 
 func TestAppUISampleData(t *testing.T) {
 	m := initializeModel()
-	jsonData, err := LoadJsonFile("../data/sample.json")
+	jsonData, _, err := LoadJsonFile("../data/sample.json")
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(0)
@@ -82,7 +82,7 @@ func TestAppUISampleData(t *testing.T) {
 
 func TestAppUISampleDataTypeEnter(t *testing.T) {
 	m := initializeModel()
-	jsonData, err := LoadJsonFile("../data/sample.json")
+	jsonData, _, err := LoadJsonFile("../data/sample.json")
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(0)

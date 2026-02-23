@@ -227,6 +227,58 @@ func TestRobustQueryJsonData3(t *testing.T) {
 	}
 }
 
+func TestAddTryOperators(t *testing.T) {
+	data := []interface{}{
+		map[string]interface{}{
+			"name":  "Alice",
+			"items": []interface{}{map[string]interface{}{"id": float64(1)}},
+		},
+		map[string]interface{}{
+			"name": "Bob",
+		},
+	}
+
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{".[].name", ".[].name"},              // all objects have name, no ? needed
+		{".[].items[].id", ".[].items[]?.id"}, // items missing in Bob, ? after items[]
+		{".[].items[]", ".[].items[]?"},       // same for shorter path
+		{".[]", ".[]"},                        // top-level array, no error
+	}
+	for _, tt := range tests {
+		got := addTryOperators(tt.input, data)
+		if got != tt.want {
+			t.Errorf("addTryOperators(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestQueryJsonData_HeterogeneousArray(t *testing.T) {
+	// Simulates slurped JSONL where some objects lack a key with nested arrays
+	data := []interface{}{
+		map[string]interface{}{
+			"name":  "Alice",
+			"items": []interface{}{map[string]interface{}{"id": float64(1)}, map[string]interface{}{"id": float64(2)}},
+		},
+		map[string]interface{}{
+			"name": "Bob",
+		},
+	}
+
+	// .[].items[].id — should return results from Alice and null for Bob
+	result, err := QueryJsonData(".[].items[].id", data)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	got := jsonDataToStrings(result)
+	want := jsonDataToStrings([]interface{}{float64(1), float64(2), nil})
+	if got != want {
+		t.Errorf("Got %v, want %v", got, want)
+	}
+}
+
 func jsonDataToStrings(jsonData interface{}) string {
 	resultBytes, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {
@@ -251,7 +303,7 @@ func TestLoadJsonFile(t *testing.T) {
 		defer func() { _ = tmpFile.Close() }()
 
 		// Call the function
-		result, err := LoadJsonFile(tmpFile.Name())
+		result, _, err := LoadJsonFile(tmpFile.Name())
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -279,14 +331,14 @@ func TestLoadJsonFile(t *testing.T) {
 		}
 		defer func() { _ = tmpFile.Close() }()
 
-		_, err = LoadJsonFile(tmpFile.Name())
+		_, _, err = LoadJsonFile(tmpFile.Name())
 		if err == nil {
 			t.Errorf("Expected an error for invalid JSON but got none")
 		}
 	})
 
 	t.Run("Non-Existent File", func(t *testing.T) {
-		_, err := LoadJsonFile("non_existent_file.json")
+		_, _, err := LoadJsonFile("non_existent_file.json")
 		if err == nil {
 			t.Errorf("Expected an error for non-existent file but got none")
 		}
